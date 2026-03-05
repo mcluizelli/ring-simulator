@@ -385,8 +385,3 @@ The output reports **flow completion times** and **average step latency**.
 
 ---
 
-# Summary
-
-This simulator provides a flexible framework for evaluating communication patterns in fat-tree networks. It allows controlled experimentation with topology size, routing behavior, traffic patterns, and congestion models.
-
-By adjusting the parameters described above, researchers can explore how network structure and workload characteristics influence distributed communication performance.
