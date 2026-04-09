@@ -1,0 +1,207 @@
+%----------------------------------------------------------
+% Work Plan: Multi-Path Ring-Based Algorithms
+%----------------------------------------------------------
+\documentclass[12pt]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage{enumitem}
+\usepackage{geometry}
+\usepackage{xcolor}
+\geometry{margin=1in}
+
+\newcommand{\mycomm}[3]{{\color{#2} \textbf{[#1: #3]}}}
+\newcommand{\jose}[1]{\mycomm{JOSE}{red}{#1}}
+\newcommand{\Ibrahem}[1]{\mycomm{Ibrahem}{blue}{#1}}
+
+\title{Work Plan}
+\author{Ibrahim Hamad}
+\date{}
+
+\begin{document}
+\maketitle
+
+
+\section*{Stage 1: Simulator Selection}
+
+\paragraph{Goal.}
+Select a network simulator that allows us to evaluate performance and demonstrate that the proposed approach indeed improves throughput.
+
+\paragraph{Open questions.}
+\begin{itemize}[leftmargin=*]
+   \item Which simulator is most suitable for our needs: NS3, OMNET, MININET, or SST?
+         \Ibrahem{A short literature survey shows that \texttt{ns-3} (with RoCEv2/RDMA extensions) and \texttt{OMNeT++} (with InfiniBand/RDMA and RoCEv2 models) are widely used for packet-level simulation of RDMA-based data-center networks, whereas \texttt{SST} is typically used for system-level HPC architecture and \texttt{Mininet} as an SDN/TCP emulator; for example, see the ns-3 RoCEv2 project at https://github.com/bobzhuyb/ns3-rdma and the OMNeT++ RoCEv2 PFC/RCM implementation by Liu et al. at https://arxiv.org/abs/1509.03559.. \newline https://github.com/inet-tub/ns3-datacenter}
+
+      \item For the chosen simulator, what is the minimal setup needed to model:
+        \begin{itemize}
+            \item A ring topology.
+            \item Multiple parallel paths between the same pair of nodes.
+            \item Per-link throughput and bottlenecks.
+        \end{itemize}
+            \Ibrahem{Examples for both \texttt{ns-3} and \texttt{OMNeT++} include small Clos/Fat-Tree or leaf--spine topologies with ECMP-like forwarding and per-link statistics. This suggests that a minimal scenario for us could be a 3-node logical ring in a small multi-path topology with link counters enabled.}
+
+
+
+  \item How accurately can the selected simulator model RDMA-like behavior (or an approximation sufficient for our purposes)?
+                \Ibrahem{Existing RoCEv2/RDMA models for \texttt{ns-3} and \texttt{OMNeT++} implement key congestion features (PFC, ECN-based control, DCQCN/RCM-like schemes) and are used in data-center RDMA studies. They provide packet-level accuracy rather than NIC micro-architecture detail as in \texttt{SST}, which is usually sufficient for analyzing throughput, link utilization, and congestion hotspots; we still need to verify that this fidelity matches the requirements of our analytical model.}
+
+\end{itemize}
+
+
+\paragraph{Comment.}
+This stage provides the experimental environment in which we will later measure throughput, detect bottlenecks, and show improvements of the proposed multi-path ring scheme. The outcome is a justified choice of a single simulator and a basic working setup.
+
+\newpage
+\section*{Stage 2: Single-Flow Baseline and Simple RDMA-RC Multi-Flow Approach}
+
+\paragraph{Goal.}
+First, implement and validate a single-flow RDMA RC ring as a baseline, measuring per-link throughput and completion time and comparing them to the analytical bottleneck model. Then, extend this baseline to a simple multi-flow approach, where whenever we detect a persistent bottleneck on a connection we open an additional RDMA connection / path between the same pair of ring neighbors.
+
+
+\paragraph{Open questions.}
+\begin{itemize}[leftmargin=*]
+  \item How do we concretely model an RDMA RC connection in the chosen simulator (or approximate it)?
+  \item What is the exact rule ``every time we have a bottleneck we open another connection/edge'':
+        \begin{itemize}
+            \item At which granularity (per iteration, per time window, per amount of data)?
+            \item How many additional connections are allowed per pair of neighbors?
+        \end{itemize}
+  \item How do we ensure that opening new connections does not break the logical ring semantics (ordering of chunks, correctness of All-Reduce)?
+\end{itemize}
+
+\paragraph{Comment.}
+This stage defines and validates the simplest dynamic policy: detect a bottleneck and react by adding an RDMA RC connection / path between neighbors, keeping the rest of the algorithm as close as possible to the classic ring.
+
+\newpage
+\section*{Stage 3: Traffic and Chunk Splitting Across Multiple Paths}
+
+\paragraph{Goal.}
+Define how to divide the ring traffic across multiple parallel paths, and how to split each \emph{chunk} between the available flows in a correct and efficient way.
+
+\paragraph{Open questions.}
+\begin{itemize}[leftmargin=*]
+  \item Given $k$ parallel connections between two ring neighbors:
+        \begin{itemize}
+            \item How do we assign chunks (or sub-chunks) to connections?
+            \item Do we split each chunk into sub-chunks, or send entire chunks on different flows?
+        \end{itemize}
+  \item What splitting policy do we use (round-robin, proportional to measured throughput, fixed weights, etc.)?
+  \item How do we ensure:
+        \begin{itemize}
+            \item In-order arrival at the receiver where required.
+            \item That the receiver can correctly reconstruct the sequence of chunks for Reduce-Scatter / All-Gather.
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Comment.}
+This stage focuses on translating ``more paths'' into a concrete data-scheduling rule at the chunk level, without changing the logical ring algorithm.
+
+\newpage
+\section*{Stage 4: Using the multi-bat Mechanism and Its Configuration}
+
+\paragraph{Goal.}
+Understand how to use the existing multi-bat mechanism (multi-path / multi-flow capability) and how to integrate it with our approach.
+
+\paragraph{Open questions.}
+\begin{itemize}[leftmargin=*]
+  \item Is the multi-bat configuration static (decided at connection setup) or dynamic (can be changed during the connection lifetime)?
+  \item At which point do we decide the multi-bat configuration:
+        \begin{itemize}
+            \item Only at the beginning of the connection?
+            \item Or can we adjust it online when we detect bottlenecks?
+        \end{itemize}
+  \item What is implemented today in common stacks / NICs:
+        \begin{itemize}
+            \item Which multi-bat options are available?
+            \item Which subset of them can we realistically model or approximate in our simulator?
+        \end{itemize}
+  \item How do we map our methodology (opening more paths when needed, splitting chunks, etc.) onto the concrete configuration knobs of the multi-bat mechanism?
+\end{itemize}
+
+\paragraph{Comment.}
+This stage bridges the abstract algorithm (open $k$ flows per neighbor) with the practical multi-bat configuration that real systems expose, and clarifies whether our control is static, dynamic, or hybrid.
+
+\newpage
+\section*{Stage 5: Throughput-Based Rule for Opening New Paths}
+
+\paragraph{Goal.}
+Formalize and validate the rule: open a new path when the \emph{throughput at the input} is larger than the \emph{throughput at the output} of a node.
+
+\paragraph{Open questions.}
+\begin{itemize}[leftmargin=*]
+  \item Precise definitions:
+        \begin{itemize}
+            \item What is ``input throughput'' for a node on the ring?
+            \item What is ``output throughput'' for that node?
+        \end{itemize}
+  \item Measurement:
+        \begin{itemize}
+            \item Over which time window do we measure the input/output rates?
+            \item How do we smooth short-term fluctuations to avoid oscillations?
+        \end{itemize}
+  \item Decision rule:
+        \begin{itemize}
+            \item For which difference (input $>$ output) do we decide to open a new path?
+            \item Do we use a fixed threshold, relative threshold, or both?
+            \item How often are we allowed to add a new path (to avoid too many connections)?
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Comment.}
+This stage turns the intuitive rule ``open a new path when ingress $>$ egress'' into a precise, measurable, and implementable control law that can be evaluated in the simulator.
+
+\newpage
+\section*{Stage 6: Topology Progression -- From Simple Ring to Fat-Tree}
+
+\paragraph{Goal.}
+Start from a very simple topology (3-node ring with several parallel paths between each pair of nodes) and then extend to a ring embedded in a Fat-Tree.
+
+\paragraph{Open questions.}
+\begin{itemize}[leftmargin=*]
+  \item Simple case:
+        \begin{itemize}
+            \item How do we define a 3-node ring with multiple parallel paths between each pair in the simulator?
+            \item Which experiments do we run in this minimal setting to isolate the behavior of:
+                  \begin{itemize}
+                      \item Traffic splitting.
+                      \item Throughput-based path opening rule.
+                      \item multi-bat configuration.
+                  \end{itemize}
+        \end{itemize}
+  \item Extension to Fat-Tree:
+        \begin{itemize}
+            \item How do we embed a logical ring over a Fat-Tree so that there are multiple equal-cost paths between logical neighbors?
+            \item How do we gradually increase complexity (number of nodes, number of paths, background traffic) while still being able to interpret the results?
+        \end{itemize}
+  \item For each step in this progression, which specific questions do we want the experiments to answer (e.g., when do extra paths stop helping, how sensitive are we to threshold choices, etc.)?
+\end{itemize}
+
+\paragraph{Comment.}
+This stage organizes the experimental work into clear levels of difficulty: first validate the ideas on a small 3-node ring with parallel paths, then move to a realistic ring inside a Fat-Tree topology, keeping the same questions and methodology.
+
+\newpage
+\section*{Stage 7: Hardware Proof-of-Concept (If Time Permits)}
+
+\paragraph{Goal.}
+Demonstrate a minimal proof-of-concept of the multi-path ring on real RDMA-capable hardware (e.g., small RoCE/InfiniBand cluster), to sanity-check the main simulation trends.
+
+\paragraph{Open questions.}
+\begin{itemize}[leftmargin=*]
+  \item Testbed:
+        \begin{itemize}
+            \item Which hardware is realistically available (number of nodes, NICs, switches)?
+        \end{itemize}
+  \item Implementation scope:
+        \begin{itemize}
+            \item Which subset of the algorithm can we implement (single-flow baseline, simple multi-flow, basic throughput-based rule)?
+        \end{itemize}
+  \item Measurements:
+        \begin{itemize}
+            \item Which counters can we read (per-QP or per-port throughput, utilization) to compare against simulations?
+        \end{itemize}
+\end{itemize}
+
+\paragraph{Comment.}
+Optional stage, subject to time and hardware availability; if feasible, it provides a small-scale reality check for the simulator-based results.
+
+
+\end{document}
