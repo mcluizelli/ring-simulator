@@ -428,6 +428,7 @@ class FlowLevelSimulator:
 
         self._next_fid: int = 1
         self.flows: Dict[int, Flow] = {}
+        self.edge_bytes_sent: Dict[Edge, float] = {}
 
         self.congestion = congestion
         if self.congestion is not None:
@@ -452,6 +453,15 @@ class FlowLevelSimulator:
 
     def _flow_edges(self, f: Flow) -> List[Edge]:
         return self._path_edges(f.path)
+
+    def get_edge_avg_throughput(self, edges: Optional[List[Edge]] = None) -> Dict[Edge, float]:
+        """Average throughput (bytes/s) on each edge over the simulation so far."""
+        if self.time_s <= 0:
+            target = edges if edges is not None else list(self.edge_bytes_sent.keys())
+            return {e: 0.0 for e in target}
+        if edges is not None:
+            return {e: self.edge_bytes_sent.get(e, 0.0) / self.time_s for e in edges}
+        return {e: b / self.time_s for e, b in self.edge_bytes_sent.items()}
 
     def step(self) -> None:
         # Inject background flows first (arrive during this tick)
@@ -495,6 +505,9 @@ class FlowLevelSimulator:
             send = min(f.remaining_bytes, rate * self.dt_s)
             f.remaining_bytes -= send
             f.sent_bytes += send
+            if send > 0:
+                for e in self._flow_edges(f):
+                    self.edge_bytes_sent[e] = self.edge_bytes_sent.get(e, 0.0) + send
 
         self.time_s += self.dt_s
 
@@ -687,19 +700,106 @@ def run_ring_allreduce(
 # Example drivers
 # ----------------------------
 
+def compute_ring_theoretical_time(
+    topo: FatTree,
+    ring: List[Node],
+    bytes_per_neighbor: float,
+    flows_per_neighbor: int = 1,
+    base_sport: int = 10000,
+    dport: int = 20000,
+    proto: int = 6,
+) -> Dict:
+    """
+    Compute the theoretical completion time for a ring transfer WITHOUT
+    running a simulation.  Replicates the exact 5-tuple construction from
+    add_ring_neighbor_flows() so that ECMP path selection is identical.
+
+    Returns dict with:
+        theoretical_time_s        – bytes_per_neighbor / B*
+        bottleneck_bandwidth_Bps  – B* (min logical-edge throughput)
+        per_logical_edge_throughput – {(src,dst): throughput_Bps}
+        edge_contention            – {physical_edge: num_ring_flows}
+    """
+    P = len(ring)
+    per_flow_bytes = bytes_per_neighbor / flows_per_neighbor
+
+    # 1. Build 5-tuples and get ECMP paths (identical logic to add_ring_neighbor_flows)
+    logical_edge_flows: Dict[Edge, List[List[Node]]] = {}  # (src,dst) -> list of paths
+    edge_flow_count: Dict[Edge, int] = {}  # physical edge -> count
+
+    for i in range(P):
+        src = ring[i]
+        dst = ring[(i + 1) % P]
+        logical_edge = (src, dst)
+        logical_edge_flows.setdefault(logical_edge, [])
+
+        for j in range(flows_per_neighbor):
+            ft = Flow5Tuple(
+                src=src, dst=dst,
+                sport=base_sport + i * 100 + j,
+                dport=dport,
+                proto=proto,
+            )
+            path = topo.ecmp_pick_path(ft)
+            logical_edge_flows[logical_edge].append(path)
+
+            # Count contention on each physical edge
+            path_edges = list(zip(path[:-1], path[1:]))
+            for e in path_edges:
+                edge_flow_count[e] = edge_flow_count.get(e, 0) + 1
+
+    # 2. For each flow, compute bottleneck rate = min(link_cap / contention) over its path
+    per_logical_edge_throughput: Dict[Edge, float] = {}
+
+    for logical_edge, paths in logical_edge_flows.items():
+        total_throughput = 0.0
+        for path in paths:
+            path_edges = list(zip(path[:-1], path[1:]))
+            if not path_edges:
+                continue
+            flow_rate = min(
+                topo.edge_of.get(e, 0.0) / max(1, edge_flow_count.get(e, 1))
+                for e in path_edges
+            )
+            total_throughput += flow_rate
+        per_logical_edge_throughput[logical_edge] = total_throughput
+
+    # 3. Bottleneck = min logical-edge throughput
+    bottleneck_bw = min(per_logical_edge_throughput.values()) if per_logical_edge_throughput else 0.0
+    theoretical_time = bytes_per_neighbor / bottleneck_bw if bottleneck_bw > 0 else float("inf")
+
+    return {
+        "theoretical_time_s": theoretical_time,
+        "bottleneck_bandwidth_Bps": bottleneck_bw,
+        "per_logical_edge_throughput": per_logical_edge_throughput,
+        "edge_contention": edge_flow_count,
+    }
+
+
 def run_simple_ring_transfer(
     topo: FatTree,
     ring: List[Node],
     bytes_per_neighbor: float,
     flows_per_neighbor: int,
-    dt_s: float = 5e-5, 
+    dt_s: float = 5e-5,
     congestion: Optional[CongestionModel] = None,
     background_cfg: Optional[BackgroundTrafficConfig] = None,
     max_steps: int = 12_000_000,
-) -> float:
-    
+    return_metrics: bool = False,
+):
+    """
+    Run a simple ring neighbor transfer.
+
+    When return_metrics is False (default), returns a float (completion time)
+    for backward compatibility.
+
+    When return_metrics is True, returns a dict with detailed metrics:
+        completion_time_s, theoretical_time_s, bottleneck_bandwidth_Bps,
+        per_logical_edge_throughput_Bps, ring_edges, ring_size,
+        bytes_per_neighbor, flows_per_neighbor
+    """
     background = BackgroundTrafficGenerator(topo, background_cfg) if background_cfg is not None else None
-    
+
     sim = FlowLevelSimulator(topo, dt_s=dt_s, congestion=congestion, background=background)
 
     ring_fids = add_ring_neighbor_flows(sim, ring, bytes_per_neighbor, flows_per_neighbor=flows_per_neighbor)
@@ -707,7 +807,46 @@ def run_simple_ring_transfer(
     def done_ring() -> bool:
         return all(sim.flows[fid].remaining_bytes <= 0 for fid in ring_fids)
 
-    return sim.run_until(done_ring, max_steps=max_steps)
+    completion_time = sim.run_until(done_ring, max_steps=max_steps)
+
+    if not return_metrics:
+        return completion_time
+
+    # Build logical edge list and compute per-logical-edge simulated throughput
+    P = len(ring)
+    ring_edges = [(ring[i], ring[(i + 1) % P]) for i in range(P)]
+
+    # Group flows by logical edge and compute simulated throughput
+    per_logical_edge_sim_throughput: Dict[Edge, float] = {}
+    for i in range(P):
+        src = ring[i]
+        dst = ring[(i + 1) % P]
+        logical_edge = (src, dst)
+        # Sum sent_bytes of all flows on this logical edge
+        edge_bytes = sum(
+            sim.flows[fid].sent_bytes
+            for fid in ring_fids
+            if sim.flows[fid].five_tuple.src == src and sim.flows[fid].five_tuple.dst == dst
+        )
+        per_logical_edge_sim_throughput[logical_edge] = edge_bytes / completion_time if completion_time > 0 else 0.0
+
+    # Static theoretical analysis (only meaningful without congestion/background)
+    theory = compute_ring_theoretical_time(
+        topo, ring, bytes_per_neighbor, flows_per_neighbor
+    )
+
+    return {
+        "completion_time_s": completion_time,
+        "theoretical_time_s": theory["theoretical_time_s"],
+        "bottleneck_bandwidth_Bps": theory["bottleneck_bandwidth_Bps"],
+        "per_logical_edge_sim_throughput_Bps": per_logical_edge_sim_throughput,
+        "per_logical_edge_theoretical_throughput_Bps": theory["per_logical_edge_throughput"],
+        "edge_contention": theory["edge_contention"],
+        "ring_edges": ring_edges,
+        "ring_size": P,
+        "bytes_per_neighbor": bytes_per_neighbor,
+        "flows_per_neighbor": flows_per_neighbor,
+    }
 
 
 def main() -> None:
