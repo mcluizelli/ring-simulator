@@ -47,6 +47,43 @@ class Flow:
     last_rate_Bps: float = 0.0
 
 
+@dataclass
+class AdaptiveConfig:
+    """Configuration for the adaptive multi-flow controller."""
+    measurement_window_s: float = 0.001   # 20 ticks at dt=50µs
+    threshold: float = 0.2               # add flow if rate < (1-threshold) * nominal
+    k_max: int = 8                        # max flows per logical edge
+    cooldown_ticks: int = 200             # min ticks between additions (~10ms)
+    base_sport: int = 10000
+    dport: int = 20000
+    proto: int = 6
+
+
+@dataclass
+class LogicalEdgeState:
+    """Runtime state for one logical ring edge during adaptive simulation."""
+    src: Node
+    dst: Node
+    edge_index: int
+    total_bytes_target: float
+    flow_ids: List[int]
+    current_k: int = 1
+    last_add_tick: int = 0
+    window_bytes_start: float = 0.0
+    window_time_start: float = 0.0
+
+    def total_sent(self, flows: Dict[int, Flow]) -> float:
+        return sum(flows[fid].sent_bytes for fid in self.flow_ids)
+
+    def total_remaining(self, flows: Dict[int, Flow]) -> float:
+        return sum(flows[fid].remaining_bytes for fid in self.flow_ids
+                   if flows[fid].remaining_bytes > 0)
+
+    def aggregate_rate(self, flows: Dict[int, Flow]) -> float:
+        return sum(flows[fid].last_rate_Bps for fid in self.flow_ids
+                   if flows[fid].remaining_bytes > 0)
+
+
 # --- Drop-in replacement: 3-tier k-ary Fat-Tree (Edge/ToR + Agg + Core) ---
 # Replace ONLY your current FatTree class with this one.
 # Everything else in your simulator can stay unchanged.
@@ -155,6 +192,35 @@ class FatTree:
 
     # ---- Helpers for routing ----
 
+    def get_edges_by_layer(self) -> Dict[str, List[Edge]]:
+        """
+        Classify all directed edges by their layer in the Fat-Tree.
+
+        Returns dict with keys:
+            'host_edge'  — host ↔ edge switch (single-path, no ECMP alternative)
+            'edge_agg'   — edge ↔ aggregation switch (intra-pod diversity)
+            'agg_core'   — aggregation ↔ core switch (inter-pod diversity)
+
+        In a real Fat-Tree, congestion mainly occurs at agg↔core (where
+        cross-pod traffic converges) and to a lesser extent edge↔agg.
+        Host↔edge links are typically not congested because they carry
+        only that host's traffic.
+        """
+        layers: Dict[str, List[Edge]] = {
+            "host_edge": [],
+            "edge_agg": [],
+            "agg_core": [],
+        }
+        for (u, v) in self.edge_of:
+            u0, v0 = u[0], v[0]
+            if u0 == "h" or v0 == "h":
+                layers["host_edge"].append((u, v))
+            elif (u0 == "e" and v0 == "a") or (u0 == "a" and v0 == "e"):
+                layers["edge_agg"].append((u, v))
+            elif (u0 == "a" and v0 == "c") or (u0 == "c" and v0 == "a"):
+                layers["agg_core"].append((u, v))
+        return layers
+
     def host_to_edge(self, host: Node) -> Node:
         # host name: h{p}_{e}_{h}
         p, e, _ = map(int, host[1:].split("_"))
@@ -246,15 +312,34 @@ class CongestionModel:
     p_on: float = 0.002
     p_off: float = 0.010
 
+    # Which Fat-Tree layers to target for congestion.
+    # None = all edges (legacy behavior).
+    # List of layer names from FatTree.get_edges_by_layer():
+    #   "agg_core", "edge_agg", "host_edge"
+    # Realistic setting: ["agg_core", "edge_agg"] — congestion only on
+    # links where ECMP provides alternative paths (cross-pod traffic).
+    target_layers: Optional[List[str]] = None
+
     def __post_init__(self) -> None:
         self.rng = random.Random(self.seed)
         self._affected: Optional[set[Edge]] = None
         self._state: Dict[Edge, bool] = {}
         self._util: Dict[Edge, float] = {}
 
-    def attach(self, all_edges: List[Edge]) -> None:
-        m = max(1, int(self.affected_fraction * len(all_edges)))
-        self._affected = set(self.rng.sample(all_edges, m))
+    def attach(self, all_edges: List[Edge], target_edges: Optional[List[Edge]] = None) -> None:
+        """
+        Select which edges are subject to congestion.
+
+        Parameters:
+            all_edges: all directed edges in the topology (used as fallback)
+            target_edges: if provided, congestion is sampled ONLY from this
+                subset. Use FatTree.get_edges_by_layer() to target specific
+                layers (e.g., agg_core + edge_agg for realistic data-center
+                congestion where cross-pod traffic causes link saturation).
+        """
+        pool = target_edges if target_edges is not None else all_edges
+        m = max(1, int(self.affected_fraction * len(pool)))
+        self._affected = set(self.rng.sample(pool, m))
         for e in self._affected:
             self._state[e] = False
 
@@ -432,7 +517,14 @@ class FlowLevelSimulator:
 
         self.congestion = congestion
         if self.congestion is not None:
-            self.congestion.attach(list(self.topo.edge_of.keys()))
+            all_edges = list(self.topo.edge_of.keys())
+            target = None
+            if hasattr(self.congestion, 'target_layers') and self.congestion.target_layers is not None:
+                layers = self.topo.get_edges_by_layer()
+                target = []
+                for layer_name in self.congestion.target_layers:
+                    target.extend(layers.get(layer_name, []))
+            self.congestion.attach(all_edges, target_edges=target)
 
         self.background = background
 
@@ -846,6 +938,145 @@ def run_simple_ring_transfer(
         "ring_size": P,
         "bytes_per_neighbor": bytes_per_neighbor,
         "flows_per_neighbor": flows_per_neighbor,
+    }
+
+
+def run_adaptive_ring_transfer(
+    topo: FatTree,
+    ring: List[Node],
+    bytes_per_neighbor: float,
+    adaptive_cfg: AdaptiveConfig,
+    dt_s: float = 5e-5,
+    congestion: Optional[CongestionModel] = None,
+    background_cfg: Optional[BackgroundTrafficConfig] = None,
+    max_steps: int = 15_000_000,
+) -> Dict:
+    """
+    Adaptive multi-flow ring transfer.
+
+    Starts with k=1 flow per logical ring edge and dynamically adds flows
+    when throughput is below nominal capacity. New flows get different
+    5-tuples so ECMP routes them to alternative physical paths.
+
+    Returns a dict with:
+        completion_time_s, final_k_per_edge, k_history,
+        per_logical_edge_throughput, ring_size, bytes_per_neighbor
+    """
+    P = len(ring)
+    if P < 2:
+        raise ValueError("Ring must have at least 2 workers.")
+
+    background = BackgroundTrafficGenerator(topo, background_cfg) if background_cfg is not None else None
+    sim = FlowLevelSimulator(topo, dt_s=dt_s, congestion=congestion, background=background)
+
+    cfg = adaptive_cfg
+    nominal_cap = topo.capacity_Bps  # per-link nominal capacity (bytes/s)
+
+    # --- Phase A: Initialize with k=1 per logical edge ---
+    edge_states: List[LogicalEdgeState] = []
+    for i in range(P):
+        src = ring[i]
+        dst = ring[(i + 1) % P]
+        ft = Flow5Tuple(
+            src=src, dst=dst,
+            sport=cfg.base_sport + i * 100 + 0,
+            dport=cfg.dport, proto=cfg.proto,
+        )
+        fid = sim.add_flow(ft, bytes_per_neighbor)
+        es = LogicalEdgeState(
+            src=src, dst=dst, edge_index=i,
+            total_bytes_target=bytes_per_neighbor,
+            flow_ids=[fid], current_k=1,
+            window_bytes_start=0.0, window_time_start=0.0,
+        )
+        edge_states.append(es)
+
+    # Event log for convergence plots
+    k_history: List[tuple] = []  # (time_s, edge_index, new_k)
+
+    # --- Phase B: Main simulation loop with adaptive control ---
+    tick = 0
+    for _ in range(max_steps):
+        sim.step()
+        tick += 1
+
+        # Check measurement window
+        if sim.time_s - edge_states[0].window_time_start >= cfg.measurement_window_s:
+            for es in edge_states:
+                # Skip edges that are already done
+                if es.total_sent(sim.flows) >= es.total_bytes_target:
+                    continue
+
+                # Compute aggregate throughput over this window
+                current_sent = es.total_sent(sim.flows)
+                window_duration = sim.time_s - es.window_time_start
+                if window_duration <= 0:
+                    continue
+                window_throughput = (current_sent - es.window_bytes_start) / window_duration
+
+                # Decision: is this edge underperforming?
+                # Compare window throughput against nominal link capacity.
+                # If throughput is significantly below nominal, it means
+                # congestion on the current path is reducing bandwidth.
+                if (window_throughput < nominal_cap * (1.0 - cfg.threshold)
+                        and es.current_k < cfg.k_max
+                        and tick - es.last_add_tick >= cfg.cooldown_ticks):
+
+                    # --- Add a new flow ---
+                    remaining = es.total_remaining(sim.flows)
+                    if remaining <= 0:
+                        continue
+
+                    new_k = es.current_k + 1
+                    new_per_flow = remaining / new_k
+
+                    # Redistribute remaining bytes across existing flows
+                    for fid in es.flow_ids:
+                        if sim.flows[fid].remaining_bytes > 0:
+                            sim.flows[fid].remaining_bytes = new_per_flow
+
+                    # Create new flow with unique 5-tuple for ECMP diversity
+                    new_ft = Flow5Tuple(
+                        src=es.src, dst=es.dst,
+                        sport=cfg.base_sport + es.edge_index * 100 + es.current_k,
+                        dport=cfg.dport, proto=cfg.proto,
+                    )
+                    new_fid = sim.add_flow(new_ft, new_per_flow)
+                    es.flow_ids.append(new_fid)
+                    es.current_k = new_k
+                    es.last_add_tick = tick
+                    k_history.append((sim.time_s, es.edge_index, new_k))
+
+                # Reset measurement window for this edge
+                es.window_bytes_start = es.total_sent(sim.flows)
+                es.window_time_start = sim.time_s
+
+        # Completion check (1-byte tolerance for floating point)
+        all_done = all(
+            es.total_sent(sim.flows) >= es.total_bytes_target - 1.0
+            for es in edge_states
+        )
+        if all_done:
+            break
+
+    # --- Phase C: Build return metrics ---
+    completion_time = sim.time_s
+
+    per_logical_edge_throughput = {}
+    final_k_per_edge = {}
+    for es in edge_states:
+        edge_key = (es.src, es.dst)
+        sent = es.total_sent(sim.flows)
+        per_logical_edge_throughput[edge_key] = sent / completion_time if completion_time > 0 else 0.0
+        final_k_per_edge[edge_key] = es.current_k
+
+    return {
+        "completion_time_s": completion_time,
+        "final_k_per_edge": final_k_per_edge,
+        "k_history": k_history,
+        "per_logical_edge_throughput": per_logical_edge_throughput,
+        "ring_size": P,
+        "bytes_per_neighbor": bytes_per_neighbor,
     }
 
 
