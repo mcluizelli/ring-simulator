@@ -114,8 +114,9 @@ def test_k1_equivalence():
 def test_kmax_saturation():
     """Aggressive config with congestion should reach k_max on most edges."""
     print("\nTest 3: k_max Saturation")
+    # Use larger ring (P=16) spread across pods so paths traverse agg/core links
     topo = FatTree(k=TOPO_K, link_capacity_Gbps=LINK_GBPS, seed=1)
-    ring = build_worker_ring(topo.hosts, worker_count=4, start_index=0)
+    ring = build_worker_ring(topo.hosts, worker_count=16, start_index=0)
 
     K_MAX = 4
     cfg = AdaptiveConfig(
@@ -124,12 +125,13 @@ def test_kmax_saturation():
         k_max=K_MAX,
         cooldown_ticks=10,  # minimal cooldown
     )
-    # Use heavy congestion to guarantee throughput deficit
+    # Use very heavy congestion on core/agg to guarantee throughput deficit
     cong = CongestionModel(
-        mode="onoff", seed=99, affected_fraction=0.5,
-        congested_util_low=0.30, congested_util_high=0.85,
+        mode="onoff", seed=99, affected_fraction=0.8,
+        congested_util_low=0.50, congested_util_high=0.95,
         normal_util_low=0.0, normal_util_high=0.05,
-        p_on=0.003, p_off=0.012,
+        p_on=0.02, p_off=0.005,
+        target_layers=["agg_core", "edge_agg"],
     )
 
     result = run_adaptive_ring_transfer(
