@@ -995,69 +995,81 @@ def run_adaptive_ring_transfer(
     k_history: List[tuple] = []  # (time_s, edge_index, new_k)
 
     # --- Phase B: Main simulation loop with adaptive control ---
+    # Performance: track completed edges to skip them, check completion
+    # periodically (not every tick), cache total_sent per window.
+    done_edges: set = set()
+    check_interval = 10  # check completion every 10 ticks (500µs)
+    safe_max = min(max_steps, int((bytes_per_neighbor / (topo.capacity_Bps * 0.01)) / dt_s))
+
     tick = 0
-    for _ in range(max_steps):
+    for _ in range(safe_max):
         sim.step()
         tick += 1
 
-        # Check measurement window
+        # === Measurement window (only for active edges) ===
         if sim.time_s - edge_states[0].window_time_start >= cfg.measurement_window_s:
-            for es in edge_states:
-                # Skip edges that are already done
-                if es.total_sent(sim.flows) >= es.total_bytes_target:
+            for i, es in enumerate(edge_states):
+                if i in done_edges:
                     continue
 
-                # Compute aggregate throughput over this window
+                # Cache total_sent (expensive — call once per edge per window)
                 current_sent = es.total_sent(sim.flows)
-                window_duration = sim.time_s - es.window_time_start
-                if window_duration <= 0:
+
+                # Mark done if finished
+                if current_sent >= es.total_bytes_target - 1.0:
+                    done_edges.add(i)
                     continue
-                window_throughput = (current_sent - es.window_bytes_start) / window_duration
 
-                # Decision: is this edge underperforming?
-                # Compare window throughput against nominal link capacity.
-                # If throughput is significantly below nominal, it means
-                # congestion on the current path is reducing bandwidth.
-                if (window_throughput < nominal_cap * (1.0 - cfg.threshold)
-                        and es.current_k < cfg.k_max
-                        and tick - es.last_add_tick >= cfg.cooldown_ticks):
+                # Throughput measurement over this window
+                window_duration = sim.time_s - es.window_time_start
+                if window_duration > 0:
+                    window_throughput = (current_sent - es.window_bytes_start) / window_duration
 
-                    # --- Add a new flow ---
-                    remaining = es.total_remaining(sim.flows)
-                    if remaining <= 0:
-                        continue
+                    # Decision: is this edge underperforming?
+                    if (window_throughput < nominal_cap * (1.0 - cfg.threshold)
+                            and es.current_k < cfg.k_max
+                            and tick - es.last_add_tick >= cfg.cooldown_ticks):
 
-                    new_k = es.current_k + 1
-                    new_per_flow = remaining / new_k
+                        remaining = es.total_remaining(sim.flows)
+                        if remaining > 0:
+                            # Count only ACTIVE flows (not completed ones)
+                            active_fids = [fid for fid in es.flow_ids
+                                           if sim.flows[fid].remaining_bytes > 0]
+                            n_active_plus_new = len(active_fids) + 1
+                            new_per_flow = remaining / n_active_plus_new
 
-                    # Redistribute remaining bytes across existing flows
-                    for fid in es.flow_ids:
-                        if sim.flows[fid].remaining_bytes > 0:
-                            sim.flows[fid].remaining_bytes = new_per_flow
+                            # Redistribute remaining bytes across active flows only
+                            for fid in active_fids:
+                                sim.flows[fid].remaining_bytes = new_per_flow
 
-                    # Create new flow with unique 5-tuple for ECMP diversity
-                    new_ft = Flow5Tuple(
-                        src=es.src, dst=es.dst,
-                        sport=cfg.base_sport + es.edge_index * 100 + es.current_k,
-                        dport=cfg.dport, proto=cfg.proto,
-                    )
-                    new_fid = sim.add_flow(new_ft, new_per_flow)
-                    es.flow_ids.append(new_fid)
-                    es.current_k = new_k
-                    es.last_add_tick = tick
-                    k_history.append((sim.time_s, es.edge_index, new_k))
+                            # Create new flow with unique 5-tuple for ECMP diversity
+                            new_ft = Flow5Tuple(
+                                src=es.src, dst=es.dst,
+                                sport=cfg.base_sport + es.edge_index * 100 + es.current_k,
+                                dport=cfg.dport, proto=cfg.proto,
+                            )
+                            new_fid = sim.add_flow(new_ft, new_per_flow)
+                            es.flow_ids.append(new_fid)
+                            es.current_k += 1
+                            es.last_add_tick = tick
+                            k_history.append((sim.time_s, es.edge_index, es.current_k))
 
-                # Reset measurement window for this edge
-                es.window_bytes_start = es.total_sent(sim.flows)
+                # Reset window (use cached current_sent)
+                es.window_bytes_start = current_sent
                 es.window_time_start = sim.time_s
 
-        # Completion check (1-byte tolerance for floating point)
-        all_done = all(
-            es.total_sent(sim.flows) >= es.total_bytes_target - 1.0
-            for es in edge_states
-        )
-        if all_done:
-            break
+            # Quick completion check after window processing
+            if len(done_edges) == len(edge_states):
+                break
+
+        # === Periodic completion check (every check_interval ticks) ===
+        elif tick % check_interval == 0:
+            for i, es in enumerate(edge_states):
+                if i not in done_edges:
+                    if es.total_sent(sim.flows) >= es.total_bytes_target - 1.0:
+                        done_edges.add(i)
+            if len(done_edges) == len(edge_states):
+                break
 
     # --- Phase C: Build return metrics ---
     completion_time = sim.time_s
