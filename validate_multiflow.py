@@ -114,7 +114,13 @@ def test_k1_equivalence():
 def test_kmax_saturation():
     """Aggressive config with congestion should reach k_max on most edges."""
     print("\nTest 3: k_max Saturation")
-    # Use larger ring (P=16) spread across pods so paths traverse agg/core links
+    # P=16 with start_index=0 in a TOPO_K=16 Fat-Tree fits within one pod
+    # (2 of 8 edge switches used). 14 of 16 ring edges are intra-ToR
+    # (single-path, no ECMP diversity); 2 are intra-pod cross-edge with 8
+    # ECMP paths via the pod's aggregation switches. Multi-flow can only
+    # help on those 2 cross-edge links — but those are exactly the
+    # bottleneck under congestion targeted at edge_agg/agg_core.
+    # (Cross-pod paths require P > 64; not exercised here.)
     topo = FatTree(k=TOPO_K, link_capacity_Gbps=LINK_GBPS, seed=1)
     ring = build_worker_ring(topo.hosts, worker_count=16, start_index=0)
 
