@@ -3,6 +3,17 @@
 **Date:** 2026-04-09
 **Branch:** ibrahim-paper
 
+## Notation
+
+| Symbol | Meaning |
+|---|---|
+| P | Number of workers in the ring |
+| M | Bytes per worker per ring transfer (`bytes_per_neighbor` in CSV) |
+| B\* | Bottleneck bandwidth: slowest ring edge's aggregate throughput |
+| T | Ring completion time = `bytes_per_neighbor / B*` |
+| `affected_fraction` | Fraction of `agg_core` and `edge_agg` links subjected to bursty congestion (NOT a per-link utilization) |
+| Sim/theory ratio | Simulated `T` divided by analytical `T` from the bottleneck model |
+
 ## Purpose
 Validate the ring simulator against the theoretical bottleneck model
 before adding multi-flow features (Stage 2).

@@ -3,6 +3,20 @@
 **Date:** 2026-04-13 (updated from 2026-04-11 initial run)
 **Branch:** ibrahim-paper
 
+## Notation
+
+| Symbol | Meaning |
+|---|---|
+| P | Number of workers in the ring (`ring_size` in CSV) |
+| k | Parallel RDMA flows per ring edge — the multi-flow parameter; k=1 is the baseline |
+| TOPO_K | Fat-Tree radix (port count per switch); 16 in all experiments |
+| B\* | Bottleneck bandwidth: slowest ring edge's aggregate throughput |
+| T | Ring completion time (`completion_time_s` in CSV) |
+| `affected_fraction` | Fraction of `agg_core` and `edge_agg` links subjected to bursty congestion (NOT a per-link utilization) |
+| `k_mean` / `k_max` | Adaptive only: per-edge mean / heaviest k at end of run, across the P ring edges (`final_k_mean`, `final_k_max` in CSV) |
+| `total_qps` | Sum of per-edge final k values across the ring = P × `k_mean` |
+| Speedup | `T(k=1)_mean / T(k)_mean` at the same `(P, congestion)` cell |
+
 ## Purpose
 
 Evaluate multi-flow per ring edge as a mechanism to exploit ECMP path

@@ -3,6 +3,20 @@
 **Date:** 2026-04-13
 **Branch:** ibrahim-paper
 
+## Notation
+
+| Symbol | Meaning |
+|---|---|
+| P | Number of workers in the ring (`ring_size` in CSV) |
+| k | Parallel RDMA flows per ring edge — the multi-flow parameter (`flows_per_neighbor` in CSV) |
+| M | Total bytes per worker for the All-Reduce (`msg_bytes` in CSV); each step transfers M/P bytes per ring edge |
+| TOPO_K | Fat-Tree radix; 16 in all experiments |
+| B\* | Bottleneck bandwidth: slowest ring edge's aggregate throughput |
+| T | All-Reduce completion time (`allreduce_time_s` in CSV); ≈ 2(P−1)·(M/P)/B\* for the pipelined case |
+| `affected_fraction` | Fraction of `agg_core` and `edge_agg` links subjected to bursty congestion |
+| `p99_step` | 99th-percentile per-step latency across the 2(P−1) pipelined steps |
+| Speedup | `T(k=1)_mean / T(k)_mean` at the same `(P, M, congestion)` cell |
+
 ## Purpose
 
 Evaluate multi-flow on the full pipelined Ring All-Reduce algorithm
