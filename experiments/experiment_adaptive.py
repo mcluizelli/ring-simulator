@@ -18,6 +18,13 @@ from typing import List, Dict, Any
 import numpy as np
 import matplotlib.pyplot as plt
 
+# --- bootstrap: make the simulator core (../sim.py) importable from this subfolder ---
+import sys as _sys
+from pathlib import Path as _BootPath
+_RING_ROOT = _BootPath(__file__).resolve().parents[1]
+if str(_RING_ROOT) not in _sys.path:
+    _sys.path.insert(0, str(_RING_ROOT))
+# ------------------------------------------------------------------------------------
 from sim import (
     FatTree,
     CongestionModel,
@@ -56,7 +63,7 @@ TARGET_LAYERS = ["agg_core", "edge_agg"]
 
 # ─── Output ──────────────────────────────────────────────────
 TODAY = date.today().isoformat()
-OUT_DIR = Path(f"results/v2.0_multiflow_{TODAY}/adaptive")
+OUT_DIR = Path(f"{_RING_ROOT}/results/v2.0_multiflow_{TODAY}/adaptive")
 
 
 def make_congestion(affected_fraction, seed):

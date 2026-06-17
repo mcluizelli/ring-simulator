@@ -22,6 +22,13 @@ from typing import List, Dict, Any
 import numpy as np
 import matplotlib.pyplot as plt
 
+# --- bootstrap: make the simulator core (../sim.py) importable from this subfolder ---
+import sys as _sys
+from pathlib import Path as _BootPath
+_RING_ROOT = _BootPath(__file__).resolve().parents[1]
+if str(_RING_ROOT) not in _sys.path:
+    _sys.path.insert(0, str(_RING_ROOT))
+# ------------------------------------------------------------------------------------
 from sim import (
     FatTree,
     CongestionModel,
@@ -51,7 +58,7 @@ P_OFF = 0.012
 
 # ─── Output paths ────────────────────────────────────────────
 TODAY = date.today().isoformat()
-OUT_DIR = Path(f"results/v1.0_validation_{TODAY}/congestion")
+OUT_DIR = Path(f"{_RING_ROOT}/results/v1.0_validation_{TODAY}/congestion")
 
 
 def make_congestion(affected_fraction: float, seed: int):

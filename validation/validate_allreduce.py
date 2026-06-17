@@ -18,6 +18,13 @@ from typing import List, Dict, Any
 import numpy as np
 import matplotlib.pyplot as plt
 
+# --- bootstrap: make the simulator core (../sim.py) importable from this subfolder ---
+import sys as _sys
+from pathlib import Path as _BootPath
+_RING_ROOT = _BootPath(__file__).resolve().parents[1]
+if str(_RING_ROOT) not in _sys.path:
+    _sys.path.insert(0, str(_RING_ROOT))
+# ------------------------------------------------------------------------------------
 from sim import (
     FatTree,
     build_worker_ring,
@@ -37,7 +44,7 @@ FLOWS_PER_NEIGHBOR = 1
 SEEDS = [1, 42]
 
 TODAY = date.today().isoformat()
-OUT_DIR = Path(f"results/v3.0_allreduce_{TODAY}/validation")
+OUT_DIR = Path(f"{_RING_ROOT}/results/v3.0_allreduce_{TODAY}/validation")
 
 
 def run_all() -> List[Dict[str, Any]]:

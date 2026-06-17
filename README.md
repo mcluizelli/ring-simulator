@@ -10,6 +10,48 @@ The simulator is intended for experimentation with **distributed training worklo
 
 ---
 
+# Repository layout
+
+The simulator **core** is a single module at the root (`sim.py`); everything that
+*runs* it lives in clearly-named subfolders, so the core is never confused with the
+drivers. Run scripts from this `ring-simulator/` directory.
+
+```
+ring-simulator/
+  sim.py            # THE core library (FatTree, CongestionModel, FlowLevelSimulator, runners)
+  results/          # all experiment output (CSV + figures), one dated folder per run
+  experiments/      # run / sweep drivers that PRODUCE results/
+                    #   experiment_congestion_models.py · run_congestion_parallel.py
+                    #   run_microburst_confirm.py · experiment_static_multiflow.py
+                    #   experiment_adaptive.py · experiment_allreduce_{multiflow,background}.py
+                    #   run_v5_parallel.py · experiments.py
+  validation/       # correctness checks (print PASS/FAIL or write validation output)
+                    #   validate_congestion_models.py · validate_baseline.py
+                    #   validate_congestion.py · validate_multiflow.py · validate_allreduce.py
+  analysis/         # post-hoc analysis + figures that READ results/
+                    #   analyze_efficiency.py · analyze_v5.py · plot_microburst_confirm.py
+  investigations/   # exploratory studies (scratch, not the canonical pipeline)
+                    #   investigate_microburst.py · investigate_microburst_duration.py
+```
+
+Every subfolder script adds the repo root to `sys.path` (so `from sim import …`
+works) and anchors its `results/` paths to this directory, so it runs correctly
+from anywhere. Examples (run from `ring-simulator/`):
+
+```
+python validation/validate_congestion_models.py            # validate the 5 congestion models
+python experiments/run_congestion_parallel.py 100 10       # D.6 sweep: n=100, 10 workers
+python experiments/run_microburst_confirm.py 200 10 0.30   # microburst confirmation (n=200)
+python analysis/plot_microburst_confirm.py results/v7.0_microburst_confirm_2026-06-17/util30
+```
+
+> **Reports live outside this repo.** The PDF report builder is at
+> `../../reports/build_congestion_report.py` (the simulator repo is not for
+> report-building). It reads `results/` and writes
+> `../../reports/congestion_models_report.pdf`.
+
+---
+
 # Architecture of the Simulator
 
 The code is organized into several main components. Each component represents a logical abstraction of a data center network or communication workload.

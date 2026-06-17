@@ -93,6 +93,13 @@ def _worker_init():
 
 import numpy as np  # noqa: E402
 
+# --- bootstrap: make the simulator core (../sim.py) importable from this subfolder ---
+import sys as _sys
+from pathlib import Path as _BootPath
+_RING_ROOT = _BootPath(__file__).resolve().parents[1]
+if str(_RING_ROOT) not in _sys.path:
+    _sys.path.insert(0, str(_RING_ROOT))
+# ------------------------------------------------------------------------------------
 from sim import (  # noqa: E402
     FatTree,
     CongestionModel,
@@ -415,7 +422,7 @@ def main():
     else:
         suffix = ""
     tag = args.out_tag or f"v5.1_{suffix}n{args.n}_{today}"
-    out_dir = Path("results") / tag
+    out_dir = (_RING_ROOT / "results") / tag
     out_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"=== v5.0 parallel run ===")

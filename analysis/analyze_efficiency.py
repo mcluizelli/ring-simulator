@@ -62,7 +62,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 SCRIPT_DIR = Path(__file__).parent
-RESULTS = SCRIPT_DIR / "results"
+RESULTS = SCRIPT_DIR.parent / "results"  # script now lives in analysis/
 OUT = RESULTS / "v4.0_efficiency_2026-04-29"
 OUT.mkdir(parents=True, exist_ok=True)
 

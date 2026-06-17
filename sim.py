@@ -295,9 +295,21 @@ class CongestionModel:
     Background utilization u(e,t) in [0,1] reduces capacity:
       residual_cap = (1-u)*nominal_cap
 
-    mode:
-      - "iid": per tick independent utilization draws
-      - "onoff": persistent bursts via per-link on/off process
+    mode (each probes a different boundary of multi-flow — see
+    docs/research/lit_congestion_models.md):
+      - "iid":       per-tick independent utilization draws (uncorrelated noise;
+                     the controller cannot track it — a stress baseline)
+      - "onoff":     persistent ms-scale bursts via per-link on/off Markov process
+                     (the realistic background regime; Benson IMC 2010)
+      - "hot_spot":  a fixed set of links is congested every tick (persistent,
+                     deterministic). Where multi-flow wins most when placed on a
+                     multi-path layer (agg_core/edge_agg).
+      - "incast":    near-total persistent saturation of a (small) victim set.
+                     Models many-to-one convergence; on a single-path host_edge
+                     link this is the topological limit multi-flow cannot bypass.
+      - "microburst": rare, very short (sub-millisecond) intense spikes. Bursts
+                     are shorter than the controller's measurement window, so the
+                     adaptive controller cannot react in time (its temporal limit).
     """
     mode: str = "onoff"
     seed: int = 1
@@ -312,6 +324,18 @@ class CongestionModel:
     p_on: float = 0.002
     p_off: float = 0.010
 
+    # --- incast mode: near-total saturation of the victim link(s) ---
+    incast_util_low: float = 0.85
+    incast_util_high: float = 0.98
+
+    # --- microburst mode: rare, very short, intense spikes ---
+    # burst_ticks counts simulator ticks (dt=50us): 2 ticks = 100us, i.e.
+    # sub-millisecond and below the 1 ms controller window (=20 ticks).
+    burst_prob: float = 0.001     # per-edge probability a burst STARTS each tick
+    burst_ticks: int = 2          # burst duration in ticks (sub-ms)
+    burst_util_low: float = 0.80
+    burst_util_high: float = 0.98
+
     # Which Fat-Tree layers to target for congestion.
     # None = all edges (legacy behavior).
     # List of layer names from FatTree.get_edges_by_layer():
@@ -322,9 +346,10 @@ class CongestionModel:
 
     def __post_init__(self) -> None:
         self.rng = random.Random(self.seed)
-        self._affected: Optional[set[Edge]] = None
+        self._affected: Optional[List[Edge]] = None
         self._state: Dict[Edge, bool] = {}
         self._util: Dict[Edge, float] = {}
+        self._burst_remaining: Dict[Edge, int] = {}  # microburst: ticks left in active burst
 
     def attach(self, all_edges: List[Edge], target_edges: Optional[List[Edge]] = None) -> None:
         """
@@ -339,9 +364,15 @@ class CongestionModel:
         """
         pool = target_edges if target_edges is not None else all_edges
         m = max(1, int(self.affected_fraction * len(pool)))
-        self._affected = set(self.rng.sample(pool, m))
+        # Keep as an ordered list (NOT a set): update_tick assigns RNG utilization
+        # draws to edges in iteration order, so a set's PYTHONHASHSEED-dependent
+        # order would make the util-to-edge assignment — and thus results —
+        # non-reproducible across processes. rng.sample already returns distinct
+        # elements in a deterministic order.
+        self._affected = self.rng.sample(pool, m)
         for e in self._affected:
             self._state[e] = False
+        self._burst_remaining = {e: 0 for e in self._affected}
 
     def _draw_util(self, congested: bool) -> float:
         if congested:
@@ -370,6 +401,36 @@ class CongestionModel:
                         congested = True
                 self._state[e] = congested
                 self._util[e] = self._draw_util(congested)
+            return
+
+        if self.mode == "hot_spot":
+            # Persistent, deterministic: the affected set is congested every tick.
+            for e in self._affected:
+                self._util[e] = self.rng.uniform(self.congested_util_low,
+                                                 self.congested_util_high)
+            return
+
+        if self.mode == "incast":
+            # Near-total persistent saturation of the victim link(s).
+            for e in self._affected:
+                self._util[e] = self.rng.uniform(self.incast_util_low,
+                                                 self.incast_util_high)
+            return
+
+        if self.mode == "microburst":
+            # Rare, very short, intense spikes (sub-ms). A burst, once started,
+            # lasts burst_ticks ticks; otherwise the link sits at normal util.
+            for e in self._affected:
+                if self._burst_remaining[e] > 0:
+                    self._util[e] = self.rng.uniform(self.burst_util_low,
+                                                     self.burst_util_high)
+                    self._burst_remaining[e] -= 1
+                elif self.rng.random() < self.burst_prob:
+                    self._util[e] = self.rng.uniform(self.burst_util_low,
+                                                     self.burst_util_high)
+                    self._burst_remaining[e] = self.burst_ticks - 1
+                else:
+                    self._util[e] = self._draw_util(congested=False)
             return
 
         raise ValueError(f"Unknown mode: {self.mode}")
