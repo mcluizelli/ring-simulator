@@ -62,7 +62,7 @@ def main() -> None:
     print(f"{'mode':<11} {'mean_util':>9} {'frac_cong':>9} {'burst_ticks':>12} {'burst_ms':>9} {'n_bursts':>9}")
     print("-" * 64)
     results = {}
-    for mode in ["onoff", "iid", "hot_spot", "incast", "microburst"]:
+    for mode in ["onoff", "iid", "hot_spot", "microburst"]:
         r = run(mode)
         results[mode] = r
         print(f"{mode:<11} {r['mean_util']:>9.3f} {r['frac_congested']:>9.3f} "
@@ -77,13 +77,6 @@ def main() -> None:
     print(f"[{'PASS' if c1 else 'FAIL'}] hot_spot persistent & mid-band "
           f"(frac>0.97, 0.45<mean<0.65): frac={r['frac_congested']:.3f}, mean={r['mean_util']:.3f}")
     ok &= c1
-
-    # incast: near-total saturation (mean util very high), persistent
-    r = results["incast"]
-    c2 = r["frac_congested"] > 0.97 and r["mean_util"] > 0.85
-    print(f"[{'PASS' if c2 else 'FAIL'}] incast near-saturation "
-          f"(frac>0.97, mean>0.85): frac={r['frac_congested']:.3f}, mean={r['mean_util']:.3f}")
-    ok &= c2
 
     # microburst: rare & very short (sub-ms) bursts, low mean util
     r = results["microburst"]

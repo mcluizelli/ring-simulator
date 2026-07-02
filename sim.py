@@ -111,10 +111,21 @@ class FatTree:
       agg(p,a) <-> core(a,i) for all i   (agg index selects the core group)
     """
 
-    def __init__(self, k: int, link_capacity_Gbps: float = 100.0, seed: int = 1) -> None:
+    def __init__(self, k: int, link_capacity_Gbps: float = 100.0, seed: int = 1,
+                 n_tiers: int = 3, oversub: float = 1.0) -> None:
         if k % 2 != 0:
             raise ValueError("k must be even for a k-ary fat-tree.")
+        if n_tiers not in (2, 3):
+            raise ValueError("n_tiers must be 2 (leaf-spine) or 3 (classic fat-tree).")
+        if oversub < 1.0:
+            raise ValueError("oversub must be >= 1.0 (1.0 = non-blocking).")
         self.k = k
+        # n_tiers=3 + oversub=1.0 reproduces the classic non-blocking fat-tree exactly.
+        # oversub>1 applies Option B: agg<->core (3-tier) / leaf<->spine (2-tier) link
+        # capacity is reduced to cap/oversub, preserving all ECMP paths (path diversity
+        # held constant so the multi-flow effect is isolated from path-count).
+        self.n_tiers = n_tiers
+        self.oversub = float(oversub)
         self.rng = random.Random(seed)
 
         self.capacity_Bps: float = link_capacity_Gbps * 1e9 / 8.0
@@ -141,8 +152,19 @@ class FatTree:
         self.edge_of[(u, v)] = self.capacity_Bps if cap_Bps is None else cap_Bps
 
     def _build(self) -> None:
+        if self.n_tiers == 2:
+            self._build_2tier()
+        else:
+            self._build_3tier()
+
+    def _build_3tier(self) -> None:
         k = self.k
         k2 = k // 2
+        # Option-B oversubscription: the agg<->core uplinks carry cap/oversub each,
+        # while host<->edge and edge<->agg stay at full capacity. This makes the
+        # agg-core layer the structural bottleneck (down:up BW = oversub:1) while
+        # keeping all (k/2)^2 inter-pod ECMP paths intact.
+        uplink_cap = self.capacity_Bps / self.oversub
 
         # Core: groups g, index i => total (k/2)^2
         for g in range(k2):
@@ -187,8 +209,41 @@ class FatTree:
                 asw = f"a{p}_{a}"
                 for i in range(k2):
                     c = f"c{a}_{i}"
-                    self._add_link(asw, c)
-                    self._add_link(c, asw)
+                    self._add_link(asw, c, uplink_cap)
+                    self._add_link(c, asw, uplink_cap)
+
+    def _build_2tier(self) -> None:
+        """Leaf-spine (2-tier) fat-tree: hosts -> leaf(ToR) -> spine.
+        leaves = k, spines = k/2, hosts/leaf = k/2. Every leaf connects to every
+        spine, so inter-leaf ECMP diversity = #spines = k/2. Naming: leaf 'e{l}',
+        spine 'c{s}', host 'h{l}_{h}'. Non-blocking when oversub=1 (k/2 host
+        downlinks vs k/2 spine uplinks); oversub reduces leaf->spine capacity."""
+        k = self.k
+        k2 = k // 2
+        uplink_cap = self.capacity_Bps / self.oversub
+
+        # Spines (reuse 'core' list for the upper tier)
+        for s in range(k2):
+            sp = f"c{s}"
+            self.core.append(sp)
+            self._add_node(sp)
+
+        # Leaves + their hosts
+        for l in range(k):
+            leaf = f"e{l}"
+            self.edge.append(leaf)
+            self._add_node(leaf)
+            for h in range(k2):
+                host = f"h{l}_{h}"
+                self.hosts.append(host)
+                self._add_node(host)
+                self._add_link(host, leaf)
+                self._add_link(leaf, host)
+            # Leaf <-> every spine (full mesh upper tier)
+            for s in range(k2):
+                sp = f"c{s}"
+                self._add_link(leaf, sp, uplink_cap)
+                self._add_link(sp, leaf, uplink_cap)
 
     # ---- Helpers for routing ----
 
@@ -206,6 +261,17 @@ class FatTree:
         Host↔edge links are typically not congested because they carry
         only that host's traffic.
         """
+        if self.n_tiers == 2:
+            # 2-tier leaf-spine: host<->leaf (host_edge), leaf<->spine (leaf_spine,
+            # the bypassable upper tier). 'e'=leaf, 'c'=spine.
+            layers2: Dict[str, List[Edge]] = {"host_edge": [], "leaf_spine": []}
+            for (u, v) in self.edge_of:
+                if u[0] == "h" or v[0] == "h":
+                    layers2["host_edge"].append((u, v))
+                else:
+                    layers2["leaf_spine"].append((u, v))
+            return layers2
+
         layers: Dict[str, List[Edge]] = {
             "host_edge": [],
             "edge_agg": [],
@@ -242,6 +308,9 @@ class FatTree:
         if src_host == dst_host:
             return [[src_host]]
 
+        if self.n_tiers == 2:
+            return self._paths_2tier(src_host, dst_host)
+
         k2 = self.k // 2
         src_edge = self.host_to_edge(src_host)
         dst_edge = self.host_to_edge(dst_host)
@@ -271,6 +340,16 @@ class FatTree:
                 # host -> src_edge -> agg(src,a) -> core(a,i) -> agg(dst,a) -> dst_edge -> host
                 paths.append([src_host, src_edge, asw_src, core, asw_dst, dst_edge, dst_host])
         return paths
+
+    def _paths_2tier(self, src_host: Node, dst_host: Node) -> List[List[Node]]:
+        """2-tier leaf-spine paths. host 'h{l}_{h}' -> leaf 'e{l}'.
+        Same leaf: 1 path. Different leaves: one path per spine (k/2 paths)."""
+        src_leaf = "e" + src_host[1:].split("_")[0]
+        dst_leaf = "e" + dst_host[1:].split("_")[0]
+        if src_leaf == dst_leaf:
+            return [[src_host, src_leaf, dst_host]]
+        k2 = self.k // 2
+        return [[src_host, src_leaf, f"c{s}", dst_leaf, dst_host] for s in range(k2)]
 
     def ecmp_pick_path(self, five_tuple) -> List[Node]:
         """
@@ -304,9 +383,6 @@ class CongestionModel:
       - "hot_spot":  a fixed set of links is congested every tick (persistent,
                      deterministic). Where multi-flow wins most when placed on a
                      multi-path layer (agg_core/edge_agg).
-      - "incast":    near-total persistent saturation of a (small) victim set.
-                     Models many-to-one convergence; on a single-path host_edge
-                     link this is the topological limit multi-flow cannot bypass.
       - "microburst": rare, very short (sub-millisecond) intense spikes. Bursts
                      are shorter than the controller's measurement window, so the
                      adaptive controller cannot react in time (its temporal limit).
@@ -323,10 +399,6 @@ class CongestionModel:
 
     p_on: float = 0.002
     p_off: float = 0.010
-
-    # --- incast mode: near-total saturation of the victim link(s) ---
-    incast_util_low: float = 0.85
-    incast_util_high: float = 0.98
 
     # --- microburst mode: rare, very short, intense spikes ---
     # burst_ticks counts simulator ticks (dt=50us): 2 ticks = 100us, i.e.
@@ -408,13 +480,6 @@ class CongestionModel:
             for e in self._affected:
                 self._util[e] = self.rng.uniform(self.congested_util_low,
                                                  self.congested_util_high)
-            return
-
-        if self.mode == "incast":
-            # Near-total persistent saturation of the victim link(s).
-            for e in self._affected:
-                self._util[e] = self.rng.uniform(self.incast_util_low,
-                                                 self.incast_util_high)
             return
 
         if self.mode == "microburst":

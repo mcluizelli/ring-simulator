@@ -1,12 +1,12 @@
 """
 D.6 — Multi-flow benefit across congestion models.
 
-Runs the simple ring transfer at P=16 for k in {1,2,4,8} under each of the five
-congestion models (onoff / iid / hot_spot / incast / microburst), with FIXED
-seeds and per-seed-paired speedup + bootstrap 95% CI (same methodology as v5.1).
+Runs the simple ring transfer at P=16 for k in {1,2,4,8} under each of the four
+congestion models (onoff / iid / hot_spot / microburst), with FIXED seeds and
+per-seed-paired speedup + bootstrap 95% CI (same methodology as v5.1).
 
-Goal: show WHERE multi-flow helps (hot_spot), where it is NEUTRAL (incast — the
-single-path access-link limit), and where it is high-variance / can hurt.
+Goal: show WHERE multi-flow helps (hot_spot, onoff), where it is high-variance,
+and where it is neutral (iid noise, sparse microburst).
 
 Usage:
     python experiments/experiment_congestion_models.py [n_seeds]   # default 100; use a small
@@ -43,8 +43,7 @@ AFFECTED_FRACTION = 0.3
 DEFAULT_SEEDS = 100
 
 # Per-model congestion parameters. Each model targets the layer that makes its
-# point: bypassable layers (agg_core/edge_agg) for the regimes multi-flow should
-# help, and the single-path host_edge for incast (the topological limit).
+# point: the bypassable layers (agg_core/edge_agg) where multi-flow can help.
 MODELS: Dict[str, dict] = {
     "onoff": dict(
         mode="onoff", target_layers=["agg_core", "edge_agg"],
@@ -59,10 +58,6 @@ MODELS: Dict[str, dict] = {
     "hot_spot": dict(
         mode="hot_spot", target_layers=["agg_core", "edge_agg"],
         congested_util_low=0.50, congested_util_high=0.95,
-    ),
-    "incast": dict(
-        mode="incast", target_layers=["host_edge"],
-        incast_util_low=0.85, incast_util_high=0.98,
     ),
     "microburst": dict(
         mode="microburst", target_layers=["agg_core", "edge_agg"],
