@@ -1,0 +1,7 @@
+fabric,P,k,equal_speedup,prop_speedup,prop_over_equal
+3tier_os4,64,1,1.0,1.0,1.0
+3tier_os4,64,2,1.628,2.015,1.238
+3tier_os4,64,4,2.421,4.238,1.751
+3tier_os4,64,8,3.55,6.114,1.722
+3tier_os4,64,16,4.923,7.291,1.481
+3tier_os4,64,32,6.528,7.82,1.198

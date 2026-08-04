@@ -18,6 +18,7 @@ import argparse
 import csv
 import itertools
 import os
+import random
 import sys
 import time
 from datetime import date
@@ -155,11 +156,34 @@ LIGHT_ALLREDUCE_FRACTIONS = [0.3, 0.5]
 CROSS_STATIC_K_VALUES = [1, 2, 4, 8]
 CROSS_STATIC_RING_SIZES = [4, 8, 16, 32, 64]
 CROSS_STATIC_FRACTIONS = [0.0, 0.1, 0.3, 0.5]
-CROSS_ADAPTIVE_RING_SIZES = [16, 32]
+CROSS_ADAPTIVE_RING_SIZES = [16, 64]  # P=16 rebuilds Fig 5 under the placement fix; P=64 is A.1
 CROSS_ADAPTIVE_FRACTIONS = [0.0, 0.1, 0.3, 0.5]
 CROSS_ALLREDUCE_K_VALUES = [1, 2, 4, 8]
 CROSS_ALLREDUCE_RING_SIZES = [16]
 CROSS_ALLREDUCE_FRACTIONS = [0.0, 0.3, 0.5]
+
+
+# ── Worker placement ────────────────────────────────────────
+# BUGFIX 2026-07-21. This driver used build_worker_ring(topo.hosts, P, start_index=0),
+# i.e. hosts[0..P-1]. FatTree lists hosts pod-major with 64 hosts per pod (k=16), so
+# that ring lies entirely inside pod 0 -- despite the --cross-pod flag whose help text
+# claims "P=64 cross-pod". At P=64, 56 of 64 ring edges are intra-rack (m=1 path, where
+# multi-flow cannot help by construction) and NO ring path traverses an agg-core link,
+# so the agg_core half of the injected congestion never touched the ring. Measured
+# effect of the bug (results/diag_placement_2026-07-21): it UNDER-reports throughout --
+# e.g. the P=64/af=0.5/k=8 headline cell reads 2.45x contiguous vs 2.76x random.
+# v9-v12 already place workers uniformly at random with SEED_BASE=9000; that is the
+# project convention and the intent here. Set PLACEMENT="contiguous" to reproduce v5.1.
+PLACEMENT = "random"
+SEED_BASE = 9000
+
+
+def make_ring(topo, ring_size: int, run_idx: int):
+    """Placement for one run. Identical across k and across methods for a given
+    run_idx, which is what makes the per-seed paired comparison valid."""
+    if PLACEMENT == "contiguous":                    # old, buggy v5.1 behaviour
+        return build_worker_ring(topo.hosts, worker_count=ring_size, start_index=0)
+    return random.Random(SEED_BASE + run_idx).sample(topo.hosts, ring_size)
 
 
 def make_congestion(frac: float, seed: int):
@@ -174,7 +198,7 @@ def _static_worker(args: Tuple[int, int, int, float, int]) -> Dict[str, Any]:
     run_idx, k_val, ring_size, frac, base_seed = args
     seed = base_seed + run_idx * 10_000_001
     topo = FatTree(k=TOPO_K, link_capacity_Gbps=LINK_GBPS, seed=seed)
-    ring = build_worker_ring(topo.hosts, worker_count=ring_size, start_index=0)
+    ring = make_ring(topo, ring_size, run_idx)
     cong = make_congestion(frac, seed + int(frac * 1000))
     t = run_simple_ring_transfer(
         topo=topo, ring=ring, bytes_per_neighbor=BYTES_PER_NEIGHBOR,
@@ -194,7 +218,7 @@ def _adaptive_worker(args: Tuple[int, int, float, int]) -> Dict[str, Any]:
     run_idx, ring_size, frac, base_seed = args
     seed = base_seed + run_idx * 10_000_001
     topo = FatTree(k=TOPO_K, link_capacity_Gbps=LINK_GBPS, seed=seed)
-    ring = build_worker_ring(topo.hosts, worker_count=ring_size, start_index=0)
+    ring = make_ring(topo, ring_size, run_idx)
     cong = make_congestion(frac, seed + int(frac * 1000))
     cfg = AdaptiveConfig(measurement_window_s=0.001, threshold=0.2,
                          k_max=4, cooldown_ticks=200)
@@ -216,7 +240,7 @@ def _adaptive_static_worker(args: Tuple[int, int, float, int, int]) -> Dict[str,
     run_idx, ring_size, frac, base_seed, k_static = args
     seed = base_seed + run_idx * 10_000_001
     topo = FatTree(k=TOPO_K, link_capacity_Gbps=LINK_GBPS, seed=seed)
-    ring = build_worker_ring(topo.hosts, worker_count=ring_size, start_index=0)
+    ring = make_ring(topo, ring_size, run_idx)
     cong = make_congestion(frac, seed + int(frac * 1000))
     t = run_simple_ring_transfer(
         topo=topo, ring=ring, bytes_per_neighbor=BYTES_PER_NEIGHBOR,
@@ -235,7 +259,7 @@ def _allreduce_worker(args: Tuple[int, int, int, float, int]) -> Dict[str, Any]:
     run_idx, k_val, ring_size, frac, base_seed = args
     seed = base_seed + run_idx * 10_000_001
     topo = FatTree(k=TOPO_K, link_capacity_Gbps=LINK_GBPS, seed=seed)
-    ring = build_worker_ring(topo.hosts, worker_count=ring_size, start_index=0)
+    ring = make_ring(topo, ring_size, run_idx)
     cong = make_congestion(frac, seed + int(frac * 1000))
     ar = run_ring_allreduce(
         topo=topo, ring=ring, total_bytes_M=ALLREDUCE_BYTES,

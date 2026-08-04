@@ -15,6 +15,7 @@ Usage:
 from __future__ import annotations
 
 import csv
+import random
 import sys
 from datetime import date
 from pathlib import Path
@@ -42,6 +43,18 @@ SWEEP_K = [1, 2, 4, 8]
 AFFECTED_FRACTION = 0.3
 DEFAULT_SEEDS = 100
 
+# ── Worker placement ────────────────────────────────────────
+# BUGFIX 2026-07-21. v6.1 used build_worker_ring(hosts, P, start_index=0), i.e.
+# hosts[0..P-1]. FatTree lists hosts pod-major with (k/2)^2 = 64 hosts per pod, so
+# that ring sits entirely inside pod 0: at P=16, 14 of 16 ring edges are intra-rack
+# (m=1 path, multi-flow cannot help there by definition) and NO ring path traverses
+# an agg-core link, making the agg_core half of the injected congestion inert.
+# The topology / k / split studies (v9-v12) place workers uniformly at random with
+# SEED_BASE=9000; that is the project convention and what this experiment intended.
+# Set PLACEMENT="contiguous" to reproduce the old (buggy) v6.1 behaviour.
+PLACEMENT = "random"
+SEED_BASE = 9000
+
 # Per-model congestion parameters. Each model targets the layer that makes its
 # point: the bypassable layers (agg_core/edge_agg) where multi-flow can help.
 MODELS: Dict[str, dict] = {
@@ -67,7 +80,7 @@ MODELS: Dict[str, dict] = {
 }
 
 TODAY = date.today().isoformat()
-OUT_DIR = Path(f"{_RING_ROOT}/results/v6.1_congestion_models_{TODAY}")
+OUT_DIR = Path(f"{_RING_ROOT}/results/v6.2_congestion_models_randomplacement_{TODAY}")
 
 
 def make_congestion(model: str, seed: int) -> CongestionModel:
@@ -78,7 +91,12 @@ def run_sweep(n_seeds: int) -> List[Dict[str, Any]]:
     # Topology is deterministic for a given k (the seed only drives congestion),
     # so build it once.
     topo = FatTree(k=TOPO_K, link_capacity_Gbps=LINK_GBPS)
-    ring = build_worker_ring(topo.hosts, worker_count=RING_SIZE, start_index=0)
+
+    def make_ring(seed: int):
+        """Placement per seed. See the PLACEMENT note above."""
+        if PLACEMENT == "contiguous":                       # old, buggy v6.1 behaviour
+            return build_worker_ring(topo.hosts, worker_count=RING_SIZE, start_index=0)
+        return random.Random(SEED_BASE + seed).sample(topo.hosts, RING_SIZE)
 
     rows: List[Dict[str, Any]] = []
     total = len(MODELS) * n_seeds * len(SWEEP_K)
@@ -88,6 +106,7 @@ def run_sweep(n_seeds: int) -> List[Dict[str, Any]]:
             # Same congestion seed for every k at this (model, seed) so the k=1 and
             # k>1 runs see the SAME congestion realization -> valid per-seed pairing.
             cong_seed = 1000 + seed
+            ring = make_ring(seed)   # same placement for every k -> valid per-seed pairing
             for k in SWEEP_K:
                 count += 1
                 cong = make_congestion(model, cong_seed)

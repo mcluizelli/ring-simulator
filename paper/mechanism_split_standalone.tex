@@ -1,0 +1,14 @@
+% Minimal wrapper to preview / compile-test the reusable snippet on its own:
+%     pdflatex mechanism_split_standalone.tex
+% It just supplies the required preamble and \input's mechanism_split.tex.
+% (Not part of the paper -- delete once you've folded the snippet into main.tex.)
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\SetAlgoLined
+\DontPrintSemicolon
+\begin{document}
+\input{mechanism_split}
+\end{document}

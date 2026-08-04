@@ -1067,6 +1067,86 @@ def run_simple_ring_transfer(
     }
 
 
+def run_ring_transfer_proportional(
+    topo: FatTree,
+    ring: List[Node],
+    bytes_per_neighbor: float,
+    flows_per_neighbor: int,
+    dt_s: float = 5e-5,
+    window_s: float = 1e-3,
+    congestion: Optional[CongestionModel] = None,
+    max_steps: int = 12_000_000,
+    return_metrics: bool = False,
+):
+    """
+    Ring neighbor transfer with THROUGHPUT-PROPORTIONAL (flexible) byte split.
+    Returns completion time (float); with return_metrics=True returns a dict
+    {completion_time_s, per_edge_delivered_bytes} (conservation checkable).
+
+    Identical flow construction to run_simple_ring_transfer (same 5-tuples ->
+    same ECMP paths), but every `window_s` the REMAINING bytes of each logical
+    edge are re-divided across its k sub-flows in proportion to their measured
+    rates (Flow.last_rate_Bps), instead of the static equal 1/k split.  A flow
+    on a fast path therefore carries more bytes and all sub-flows of an edge
+    finish together — the fluid-model idealization of proportional chunk
+    scheduling across QPs (cf. NCCL_IB_SPLIT_DATA_ON_QPS, which splits equally).
+
+    Notes:
+      - In this fluid model a flow's rate depends only on the SET of active
+        flows (max-min share), not on its remaining bytes, so the proportional
+        allocation converges after the first window; subsequent windows only
+        react to regime changes (an edge finishing, congestion ticks).
+      - Redistribution conserves each logical edge's remaining bytes exactly.
+      - Upper bound: compute_ring_theoretical_time (optimal split over the SAME
+        hashed paths); this runner may approach but should not beat it (beyond
+        the ~1% early-finish slack the equal-split runner also enjoys).
+    """
+    sim = FlowLevelSimulator(topo, dt_s=dt_s, congestion=congestion)
+    ring_fids = add_ring_neighbor_flows(sim, ring, bytes_per_neighbor, flows_per_neighbor=flows_per_neighbor)
+
+    # group flows by logical edge
+    P = len(ring)
+    edge_fids: List[List[int]] = []
+    idx = 0
+    for _ in range(P):
+        edge_fids.append(ring_fids[idx: idx + flows_per_neighbor])
+        idx += flows_per_neighbor
+
+    window_ticks = max(1, int(round(window_s / dt_s)))
+
+    def done() -> bool:
+        return all(sim.flows[fid].remaining_bytes <= 0 for fid in ring_fids)
+
+    def _finish():
+        if not return_metrics:
+            return sim.time_s
+        per_edge = {i: sum(sim.flows[fid].sent_bytes for fid in fids)
+                    for i, fids in enumerate(edge_fids)}
+        return {"completion_time_s": sim.time_s, "per_edge_delivered_bytes": per_edge}
+
+    steps = 0
+    while steps < max_steps:
+        if done():
+            return _finish()
+        sim.step()
+        steps += 1
+        # Redistribute immediately after the first step (rates are known and, in
+        # the fluid model, constant until a regime change), then every window.
+        if flows_per_neighbor > 1 and (steps == 1 or steps % window_ticks == 0):
+            for fids in edge_fids:
+                flows = [sim.flows[fid] for fid in fids]
+                rem_total = sum(max(0.0, f.remaining_bytes) for f in flows)
+                if rem_total <= 0:
+                    continue
+                rates = [max(0.0, getattr(f, "last_rate_Bps", 0.0)) for f in flows]
+                rate_sum = sum(r for r in rates if math.isfinite(r))
+                if rate_sum <= 0:
+                    continue  # nothing measurable this window; keep current split
+                for f, r in zip(flows, rates):
+                    f.remaining_bytes = rem_total * (r / rate_sum if math.isfinite(r) else 0.0)
+    raise RuntimeError("Proportional ring transfer did not finish within max_steps.")
+
+
 def run_adaptive_ring_transfer(
     topo: FatTree,
     ring: List[Node],
