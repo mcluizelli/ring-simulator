@@ -1,3 +1,15 @@
 __pycache__/
 LOCAL_NOTES.md
 ROADMAP.md
+
+# Local paper-build debris.
+paper/tmp/
+paper/paper_review_local.pdf
+paper/paper_submission_local.pdf
+texput.log
+
+# Raw campaign internals are archived separately; compact signed summaries remain visible.
+investigations/**/checkpoints/
+investigations/**/timing_segments/
+investigations/**/.staging/
+investigations/**/.run.lock

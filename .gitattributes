@@ -1,0 +1,16 @@
+# Stable, cross-platform text checkouts.
+*.py text eol=lf
+*.md text eol=lf
+*.tex text eol=lf
+*.json text eol=lf
+*.csv text eol=lf
+*.pdf binary
+*.png binary
+
+# These paths are sealed by raw SHA-256 and must retain their exact bytes.
+/sim.py -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
+/investigations/** -text whitespace=cr-at-eol
+/experiments/** -text whitespace=cr-at-eol
+
+# Frozen results are sealed by their physical CRLF bytes.
+/results/**/*.csv -text whitespace=cr-at-eol
