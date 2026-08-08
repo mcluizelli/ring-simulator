@@ -871,3 +871,39 @@ campaigns is retained outside source Git in five read-only, content-addressed
 archives indexed by `SEALED_ARTIFACT_ARCHIVE_INDEX_2026_08_08.json`. The index
 records that no off-machine replica has yet been established; the source trees
 remain present and were not deleted.
+
+### Full-extension numerical-gate incident - 2026-08-08
+
+The first full execution target, `n1000_extension_2026-08-08_02`, stopped
+fail-closed after writing `25,563/28,800` pair checkpoints. It is a retained
+forensic attempt, not `n=1000` evidence. The first missing pair is
+`a077_proportional_2tier_p64_k2__s457`. A write-free replay reproduced the
+failure only for its link-local run: the exact logical-edge target is
+`67,108,864` bytes, while three edges reported
+`67,108,864.00000101` bytes. The difference is
+`1.0132789611816406e-6` bytes, exactly `68` target ULPs and about
+`1.51e-14` relatively. Every one of the `128` foreground flows had exactly
+zero remaining bytes. The paired max-min run passed with a maximum of `40`
+target ULPs.
+
+An independent forensic pass validated all `25,563` saved checkpoints and all
+`51,126` allocator rows. No saved checkpoint is invalid; the largest accepted
+logical-edge error is `64` ULPs (`9.5367431640625e-7` bytes), and `256` rows
+sit exactly at that representable value. A further write-free diagnostic over
+`80` simulations spanning the four missing `2tier/P=64` cells observed no
+error above `68` ULPs. The fixed `1e-6`-byte cutoff therefore falls between two
+adjacent rounding-scale outcomes; this is binary64 accumulation at the
+proportional redistribution boundary, not a byte-, rate-, or completion-model
+failure.
+
+The corrective direction selected for review is limited to the validation envelope:
+retain exact-zero per-flow remaining-byte checks and every pairing, digest,
+scope, and conservation-coverage gate; do not change `sim.py`; replace the
+absolute-only proportional envelope with the predeclared scale-aware bound
+`max(1e-6, 128 * ulp(target_bytes))`; and add regressions that accept `68` ULP
+but reject values above `128` ULP. Because the execution manifest binds the original
+driver and gate bytes, `_02` must not be resumed through an unrecorded runtime
+override. A fresh target may start only after the patch, tests, independent
+review, commit, push, clean-checkout verification, and a new preflight. Until
+that target is sealed and independently audited, there is no full-extension
+scientific result.

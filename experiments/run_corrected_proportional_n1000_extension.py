@@ -85,9 +85,9 @@ EXPECTED_BOOTSTRAP_SHA256 = {
 EXPECTED_SOURCE_HASHES = {
     SIM_PATH: "96505cefe2e5aa761b80080d77145bfd384c688ce4a8ca5792f8f7ce17ef59bd",
     CANONICAL_DRIVER_PATH: "7d01a2e598c799b0c533fb650f33b8537f51fa3187f427fcf9ada108d56fd8b4",
-    CORE_DRIVER_PATH: "777018e1a408eb5274d5ee87700fc66e4396fd5d39722f625f22e48840efc431",
-    CORRECTED_N100_DRIVER_PATH: "7b65d37635a3d8315517f0076602cb4c663c1c0659ef1dbb3ee56e3053b10f9b",
-    SPEC_PATH: "b3a74dcc5808d054f8025613b7a47f24867a33dbc894710aeced463b7788b41b",
+    CORE_DRIVER_PATH: "9613d3a753ea8e5c720bc2a5ac43110fd363aba13181790100fda936501408d0",
+    CORRECTED_N100_DRIVER_PATH: "670d98ab17960fb2061de04eecca993cf35fe568a98b164a8dc3ce780e695196",
+    SPEC_PATH: "8f70b5d0963de93539ad663d1e195ac52ea0cc568d5dcf0bbcb6740fae7bdc42",
     EXPOSURE_PROVENANCE_PATH: "2905e293712650b8c2ef8a259326e5502f102bf5773515712979aef2a8f7cb1b",
 }
 EXPECTED_N100_HASHES = {
@@ -588,6 +588,10 @@ def _validate_checkpoint(
     if len(rows) != 2 or {row.get("allocator") for row in rows} != set(ALLOCATORS):
         raise RuntimeError(f"checkpoint allocator bijection failed: {pair['pair_id']}")
     config = pair["config"]
+    proportional_target = float(config["bytes_per_neighbor"])
+    proportional_roundoff_tolerance = core._binary64_roundoff_tolerance(
+        proportional_target
+    )
     if (
         config.get("family") != "static_split"
         or config.get("runner") != "proportional"
@@ -602,6 +606,14 @@ def _validate_checkpoint(
         max_error = float(conservation.get("maximum_abs_error_bytes", math.inf))
         max_flow_error = float(
             conservation.get("maximum_per_flow_error_bytes", math.inf)
+        )
+        tolerance_seal_invalid = (
+            float(conservation.get("roundoff_tolerance_B", math.nan))
+            != proportional_roundoff_tolerance
+            or conservation.get("roundoff_tolerance_B_hex")
+            != core._f64_hex(proportional_roundoff_tolerance)
+            or int(conservation.get("roundoff_tolerance_ulps", -1))
+            != core.PROPORTIONAL_CONSERVATION_ULPS
         )
         if (
             row.get("pair_id") != pair["pair_id"]
@@ -623,8 +635,9 @@ def _validate_checkpoint(
             or float(conservation.get("foreground_remaining_min_bytes", math.inf)) != 0.0
             or float(conservation.get("foreground_remaining_max_bytes", math.inf)) != 0.0
             or int(conservation.get("non_bit_exact_flow_count", -1)) != 0
-            or not 0.0 <= max_error <= 1e-6
-            or not 0.0 <= max_flow_error <= 1e-6
+            or not 0.0 <= max_error <= proportional_roundoff_tolerance
+            or not 0.0 <= max_flow_error <= proportional_roundoff_tolerance
+            or tolerance_seal_invalid
             or row.get("adaptive_gate") is not None
             or row.get("background_instance_id") is not None
             or row.get("congestion_instance_id") is not None

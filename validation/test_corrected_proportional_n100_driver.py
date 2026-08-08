@@ -491,6 +491,48 @@ class CorrectedProportionalN100DriverTests(unittest.TestCase):
                 with self.assertRaises(RuntimeError):
                     driver._conservation_gate(config, result, bad_engine)
 
+    def test_seed457_68_ulp_roundoff_passes_but_129_ulps_fails(self) -> None:
+        target = float(64 * 1024 * 1024)
+        ulp = math.ulp(target)
+        seed457_value = float.fromhex("0x1.0000000000044p+26")
+        self.assertEqual(seed457_value - target, 68 * ulp)
+        config = {
+            "runner": "proportional",
+            "ring_size": 2,
+            "k": 2,
+            "bytes_per_neighbor": target,
+        }
+
+        def flow(fid: int) -> SimpleNamespace:
+            return SimpleNamespace(
+                fid=fid,
+                remaining_bytes=0.0,
+                sent_bytes=target / 2,
+                five_tuple=SimpleNamespace(dport=20000),
+            )
+
+        engine = SimpleNamespace(flows={fid: flow(fid) for fid in range(4)})
+        report = driver._conservation_gate(
+            config,
+            {"per_edge_delivered_bytes": {"edge0": target, "edge23": seed457_value}},
+            engine,
+        )
+        self.assertEqual(report["maximum_abs_error_bytes"], 68 * ulp)
+        self.assertEqual(report["roundoff_tolerance_B"], 128 * ulp)
+        self.assertEqual(report["remaining_foreground_bytes"], 0.0)
+
+        with self.assertRaises(RuntimeError):
+            driver._conservation_gate(
+                config,
+                {
+                    "per_edge_delivered_bytes": {
+                        "edge0": target,
+                        "edge23": target + 129 * ulp,
+                    }
+                },
+                engine,
+            )
+
     def test_audit_v2_overlap_gate_accepts_sealed_rows_and_rejects_delta(self) -> None:
         bundle = json.loads(AUDIT_V2_EQUIVALENCE.read_text(encoding="utf-8"))
         checkpoints = {

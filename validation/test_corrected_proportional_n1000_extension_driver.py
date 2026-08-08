@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import ast
 import json
+import math
 import sys
 import tempfile
 import unittest
@@ -30,6 +31,9 @@ class CorrectedProportionalN1000ExtensionTests(unittest.TestCase):
         digest = "a" * 64
         config = pair["config"]
         flow_count = int(config["ring_size"]) * int(config["k"])
+        roundoff_tolerance = driver.core._binary64_roundoff_tolerance(
+            float(config["bytes_per_neighbor"])
+        )
         ticks = 100
         completion = ticks * float(config["dt_s"])
         for position, allocator in enumerate(pair["execution_order"]):
@@ -76,6 +80,13 @@ class CorrectedProportionalN1000ExtensionTests(unittest.TestCase):
                         "non_bit_exact_flow_count": 0,
                         "maximum_abs_error_bytes": 0.0,
                         "maximum_per_flow_error_bytes": 0.0,
+                        "roundoff_tolerance_B": roundoff_tolerance,
+                        "roundoff_tolerance_B_hex": driver.core._f64_hex(
+                            roundoff_tolerance
+                        ),
+                        "roundoff_tolerance_ulps": (
+                            driver.core.PROPORTIONAL_CONSERVATION_ULPS
+                        ),
                     },
                 }
             )
@@ -315,6 +326,58 @@ class CorrectedProportionalN1000ExtensionTests(unittest.TestCase):
         bad["rows"][0]["completion_time_hex"] = "0" * 16
         with self.assertRaises(RuntimeError):
             driver._validate_checkpoint(bad, pair, self.plan["plan_sha256"])
+
+    def test_seed457_roundoff_envelope_is_bounded_and_zero_remaining_stays_exact(self) -> None:
+        pair = self.by_id["a077_proportional_2tier_p64_k2__s457"]
+        checkpoint = self._checkpoint(pair)
+        target = float(pair["config"]["bytes_per_neighbor"])
+        target_ulp = math.ulp(target)
+        tolerance = driver.core._binary64_roundoff_tolerance(target)
+        self.assertEqual(tolerance, 128 * target_ulp)
+
+        for row in checkpoint["rows"]:
+            row["conservation"]["maximum_abs_error_bytes"] = 68 * target_ulp
+        driver._validate_checkpoint(checkpoint, pair, self.plan["plan_sha256"])
+
+        above_envelope = json.loads(json.dumps(checkpoint))
+        above_envelope["rows"][0]["conservation"][
+            "maximum_abs_error_bytes"
+        ] = 129 * target_ulp
+        with self.assertRaises(RuntimeError):
+            driver._validate_checkpoint(
+                above_envelope, pair, self.plan["plan_sha256"]
+            )
+
+        nonzero_remaining = json.loads(json.dumps(checkpoint))
+        conservation = nonzero_remaining["rows"][0]["conservation"]
+        conservation["foreground_remaining_nonzero_count"] = 1
+        conservation["remaining_foreground_bytes"] = target_ulp
+        conservation["foreground_remaining_max_bytes"] = target_ulp
+        with self.assertRaises(RuntimeError):
+            driver._validate_checkpoint(
+                nonzero_remaining, pair, self.plan["plan_sha256"]
+            )
+
+        partial_tolerance_seal = json.loads(json.dumps(checkpoint))
+        del partial_tolerance_seal["rows"][0]["conservation"][
+            "roundoff_tolerance_B_hex"
+        ]
+        with self.assertRaises(RuntimeError):
+            driver._validate_checkpoint(
+                partial_tolerance_seal, pair, self.plan["plan_sha256"]
+            )
+
+        missing_tolerance_seal = json.loads(json.dumps(checkpoint))
+        for field in (
+            "roundoff_tolerance_B",
+            "roundoff_tolerance_B_hex",
+            "roundoff_tolerance_ulps",
+        ):
+            del missing_tolerance_seal["rows"][0]["conservation"][field]
+        with self.assertRaises(RuntimeError):
+            driver._validate_checkpoint(
+                missing_tolerance_seal, pair, self.plan["plan_sha256"]
+            )
 
     def test_timing_regular_and_recovery_are_recomputed(self) -> None:
         pair = self.plan["pairs"][0]

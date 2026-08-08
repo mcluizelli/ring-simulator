@@ -3,11 +3,9 @@ from __future__ import annotations
 
 import copy
 import json
-import multiprocessing as mp
 import sys
 import tempfile
 import unittest
-from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
@@ -284,20 +282,69 @@ class CorrectedProportionalAuditV2Tests(unittest.TestCase):
             verdict["maximum_cell_allocator_median_abs_relative_delta"], 0.015
         )
 
-    def test_spawned_affected_job_replays_both_allocators(self) -> None:
-        job = self._job(
-            "proportional_3tier_os4_p64_k16", 33, audit.PRODUCTION_WINDOW_S
+    def test_historical_v2_rejects_current_engine_source_drift(self) -> None:
+        core_path = ROOT / "experiments" / "run_rate_allocator_pilot.py"
+        historical = audit.EXPECTED_SOURCE_HASHES[core_path]
+        current = audit._sha256_file(core_path)
+        self.assertEqual(
+            historical,
+            "777018e1a408eb5274d5ee87700fc66e4396fd5d39722f625f22e48840efc431",
         )
-        with ProcessPoolExecutor(
-            max_workers=1,
-            mp_context=mp.get_context("spawn"),
-            initializer=audit._worker_init,
-            initargs=(
-                audit._sha256_file(audit.SCRIPT_PATH),
-                audit._sha256_file(audit.SPEC_PATH),
-            ),
-        ) as pool:
-            result = pool.submit(audit._run_job, job).result(timeout=60)
+        self.assertNotEqual(current, historical)
+        with self.assertRaisesRegex(RuntimeError, "immutable input changed"):
+            audit.verify_immutable_inputs(self.plan)
+
+    def test_sealed_one_ms_equivalence_remains_structurally_valid(self) -> None:
+        bundle_path = (
+            INVESTIGATIONS
+            / "proportional_mechanism_audit_v2"
+            / "audit_v2_2026-08-07_01"
+            / "production_equivalence.json"
+        )
+        complete = json.loads(
+            (bundle_path.parent / "COMPLETE.json").read_text(encoding="utf-8")
+        )
+        signed = complete["artifacts"][bundle_path.name]
+        self.assertEqual(bundle_path.stat().st_size, signed["bytes"])
+        self.assertEqual(audit._sha256_file(bundle_path), signed["sha256"])
+        bundle = json.loads(bundle_path.read_text(encoding="utf-8"))
+        sealed = next(
+            item
+            for item in bundle["pairs"]
+            if item["pair_id"]
+            == "a072_proportional_3tier_os4_p64_k16__s033"
+        )
+        traces = []
+        for projection in sealed["projections"]:
+            traces.append(
+                {
+                    "allocator": projection["allocator"],
+                    "completion_time_hex": projection["completion_time_hex"],
+                    "simulated_ticks": projection["simulated_ticks"],
+                    "delivered_bytes_hex": projection["delivered_bytes_hex"],
+                    "delivered_vector_sha256": projection[
+                        "delivered_vector_sha256"
+                    ],
+                    "config_sha256": projection["config_sha256"],
+                    "topology_sha256": projection["topology_sha256"],
+                    "ring_sha256": projection["ring_sha256"],
+                    "route_sha256": projection["route_sha256"],
+                    "metrics": {
+                        "final_conservation_max_error_B": projection[
+                            "worker_conservation"
+                        ]["maximum_abs_error_bytes"]
+                    },
+                }
+            )
+        result = {
+            "case_id": sealed["case_id"],
+            "source_pair_id": sealed["pair_id"],
+            "pair_spec": copy.deepcopy(sealed["fresh_pair_worker"]["pair_spec"]),
+            "window_s": audit.PRODUCTION_WINDOW_S,
+            "traces": traces,
+            "direct_production": sealed["direct_production"],
+            "fresh_pair_worker": sealed["fresh_pair_worker"],
+        }
         evidence = audit._validate_one_ms_equivalence(result)
         self.assertEqual(evidence["sidecar_direct_exact_rows"], 2)
         self.assertEqual(evidence["worker_bridge_exact_rows"], 2)

@@ -6,6 +6,7 @@ import copy
 import hashlib
 import importlib.util
 import json
+import math
 import shutil
 import struct
 import sys
@@ -45,6 +46,11 @@ def _valid_row(pair: dict[str, object], allocator: str, position: int) -> dict[s
     assert isinstance(config, dict)
     completion = 0.0054
     zero_hex = struct.pack(">d", 0.0).hex()
+    target = float(config["bytes_per_neighbor"])
+    roundoff_tolerance = max(
+        auditor.COMPACT_N100_CONSERVATION_TOLERANCE_B,
+        auditor.PROPORTIONAL_CONSERVATION_ULPS * math.ulp(target),
+    )
     common_digest = "1" * 64
     return {
         "adaptive_gate": None,
@@ -70,6 +76,11 @@ def _valid_row(pair: dict[str, object], allocator: str, position: int) -> dict[s
             "non_bit_exact_flow_count": 0,
             "passed": True,
             "remaining_foreground_bytes": 0.0,
+            "roundoff_tolerance_B": roundoff_tolerance,
+            "roundoff_tolerance_B_hex": struct.pack(
+                ">d", roundoff_tolerance
+            ).hex(),
+            "roundoff_tolerance_ulps": 128,
         },
         "execution_position": position,
         "family": "static_split",
@@ -302,6 +313,52 @@ class CorrectedProportionalN1000ExtensionAuditorTests(unittest.TestCase):
         checkpoint["rows"][1]["topology_sha256"] = "2" * 64
         with self.assertRaisesRegex(RuntimeError, "paired topology_sha256 mismatch"):
             auditor._validate_checkpoint(checkpoint, pair, "a" * 64)
+
+    def test_extension_conservation_accepts_observed_68_ulps_and_requires_fields(self) -> None:
+        pair = auditor._expected_pairs((100,))[0]
+        target = float(pair["config"]["bytes_per_neighbor"])
+        ulp = math.ulp(target)
+        self.assertEqual(auditor.COMPACT_N100_CONSERVATION_TOLERANCE_B, 1e-6)
+        self.assertGreater(68 * ulp, auditor.COMPACT_N100_CONSERVATION_TOLERANCE_B)
+        checkpoint = _valid_checkpoint(pair)
+        conservation = checkpoint["rows"][0]["conservation"]
+        conservation["maximum_abs_error_bytes"] = 68 * ulp
+        conservation["maximum_abs_error_bytes_hex"] = struct.pack(
+            ">d", 68 * ulp
+        ).hex()
+        auditor._validate_checkpoint(checkpoint, pair, "a" * 64)
+
+        missing_field = _valid_checkpoint(pair)
+        del missing_field["rows"][0]["conservation"]["roundoff_tolerance_B"]
+        with self.assertRaisesRegex(RuntimeError, "roundoff tolerance"):
+            auditor._validate_checkpoint(missing_field, pair, "a" * 64)
+
+        altered_field = _valid_checkpoint(pair)
+        altered = altered_field["rows"][0]["conservation"]
+        altered["roundoff_tolerance_B"] = 64 * ulp
+        altered["roundoff_tolerance_B_hex"] = struct.pack(">d", 64 * ulp).hex()
+        with self.assertRaisesRegex(RuntimeError, "roundoff-tolerance fields mismatch"):
+            auditor._validate_checkpoint(altered_field, pair, "a" * 64)
+
+    def test_extension_conservation_rejects_above_128_ulps_and_nonzero_remaining(self) -> None:
+        pair = auditor._expected_pairs((100,))[0]
+        target = float(pair["config"]["bytes_per_neighbor"])
+        ulp = math.ulp(target)
+        checkpoint = _valid_checkpoint(pair)
+        conservation = checkpoint["rows"][0]["conservation"]
+        conservation["maximum_abs_error_bytes"] = 129 * ulp
+        conservation["maximum_abs_error_bytes_hex"] = struct.pack(
+            ">d", 129 * ulp
+        ).hex()
+        with self.assertRaisesRegex(RuntimeError, "extension roundoff tolerance"):
+            auditor._validate_checkpoint(checkpoint, pair, "a" * 64)
+
+        nonzero_remaining = _valid_checkpoint(pair)
+        nonzero_remaining["rows"][0]["conservation"][
+            "remaining_foreground_bytes"
+        ] = ulp
+        with self.assertRaisesRegex(RuntimeError, "foreground bytes remain exactly"):
+            auditor._validate_checkpoint(nonzero_remaining, pair, "a" * 64)
 
     def test_checkpoint_validator_rejects_truncated_coverage_and_bad_timing(self) -> None:
         pair = auditor._expected_pairs((100,))[0]

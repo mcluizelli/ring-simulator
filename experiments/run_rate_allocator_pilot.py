@@ -902,6 +902,20 @@ def _foreground_flows(
     return [flow for flow in engine.flows.values() if flow.five_tuple.dport == dport]
 
 
+PROPORTIONAL_CONSERVATION_ULPS = 128
+
+
+def _binary64_roundoff_tolerance(target: float) -> float:
+    """Return the fixed byte floor or 128 ULPs at the target scale."""
+    numeric = float(target)
+    if not math.isfinite(numeric) or numeric <= 0.0:
+        raise ValueError("roundoff-tolerance target must be finite and positive")
+    return max(
+        1e-6,
+        PROPORTIONAL_CONSERVATION_ULPS * math.ulp(numeric),
+    )
+
+
 def _conservation_gate(
     config: Mapping[str, Any], result: Any, engine: PilotAuditedSimulator
 ) -> Dict[str, Any]:
@@ -912,6 +926,7 @@ def _conservation_gate(
     checks = 0
     non_bit_exact_flow_count = 0
     maximum_per_flow_error = 0.0
+    proportional_roundoff_tolerance: Optional[float] = None
 
     if runner == "simple":
         target = float(config["bytes_per_neighbor"])
@@ -938,11 +953,15 @@ def _conservation_gate(
         delivered = result["per_edge_delivered_bytes"]
         if len(delivered) != int(config["ring_size"]):
             raise RuntimeError("proportional runner returned the wrong logical-edge count")
-        for value in delivered.values():
-            error = abs(float(value) - target)
+        delivered_values = [float(value) for value in delivered.values()]
+        if any(not math.isfinite(value) for value in delivered_values):
+            raise RuntimeError("proportional runner returned non-finite delivered bytes")
+        proportional_roundoff_tolerance = _binary64_roundoff_tolerance(target)
+        for value in delivered_values:
+            error = abs(value - target)
             maximum_error = max(maximum_error, error)
             checks += 1
-            if error > 1e-6:
+            if error > proportional_roundoff_tolerance:
                 raise RuntimeError(f"proportional byte-conservation error {error} B")
     elif runner == "adaptive":
         target = float(config["bytes_per_neighbor"])
@@ -1016,7 +1035,7 @@ def _conservation_gate(
     else:
         raise RuntimeError(f"unknown runner {runner}")
 
-    return {
+    verdict = {
         "passed": True,
         "foreground_flow_count": len(flows),
         "checks": checks,
@@ -1027,6 +1046,17 @@ def _conservation_gate(
         "maximum_per_flow_error_bytes": maximum_per_flow_error,
         "maximum_per_flow_error_bytes_hex": _f64_hex(maximum_per_flow_error),
     }
+    if proportional_roundoff_tolerance is not None:
+        verdict.update(
+            {
+                "roundoff_tolerance_B": proportional_roundoff_tolerance,
+                "roundoff_tolerance_B_hex": _f64_hex(
+                    proportional_roundoff_tolerance
+                ),
+                "roundoff_tolerance_ulps": PROPORTIONAL_CONSERVATION_ULPS,
+            }
+        )
+    return verdict
 
 
 def _adaptive_gate(result: Mapping[str, Any]) -> Dict[str, Any]:

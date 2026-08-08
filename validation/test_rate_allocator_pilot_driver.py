@@ -166,6 +166,35 @@ class RateAllocatorPilotDriverTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             pilot._conservation_gate(config, 0.031, engine_with(rejected))
 
+    def test_proportional_conservation_accepts_seed457_roundoff_only_to_128_ulps(self) -> None:
+        target = float(64 * 1024 * 1024)
+        ulp = math.ulp(target)
+        config = {
+            "runner": "proportional",
+            "bytes_per_neighbor": target,
+            "ring_size": 1,
+        }
+        engine = SimpleNamespace(flows={})
+
+        seed457_value = float.fromhex("0x1.0000000000044p+26")
+        self.assertEqual(seed457_value - target, 68 * ulp)
+        report = pilot._conservation_gate(
+            config,
+            {"per_edge_delivered_bytes": {"edge23": seed457_value}},
+            engine,
+        )
+        self.assertEqual(report["maximum_abs_error_bytes"], 68 * ulp)
+        self.assertEqual(report["roundoff_tolerance_B"], 128 * ulp)
+        self.assertEqual(report["roundoff_tolerance_ulps"], 128)
+
+        rejected = target + 129 * ulp
+        with self.assertRaises(RuntimeError):
+            pilot._conservation_gate(
+                config,
+                {"per_edge_delivered_bytes": {"edge23": rejected}},
+                engine,
+            )
+
     def test_allreduce_per_flow_gate_is_local_ulp_scale(self) -> None:
         requested = float(16 * 1024 * 1024)
         self.assertTrue(

@@ -16,6 +16,7 @@ investigations/**/.staging/
 # Failed attempts are retained locally for forensics, not as production evidence.
 investigations/corrected_proportional_n100/n100_2026-08-07_01/
 investigations/cp_n1000/n1000_extension_2026-08-08_01/
+investigations/cp_n1000/n1000_extension_2026-08-08_02/
 investigations/rate_allocator_n100/n100_2026-08-06_01/
 investigations/rate_allocator_n100/n100_2026-08-06_02/
 investigations/rate_allocator_pilot/n5_2026-08-06_01/

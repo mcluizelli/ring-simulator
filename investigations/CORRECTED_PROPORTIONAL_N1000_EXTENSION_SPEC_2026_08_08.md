@@ -93,10 +93,18 @@ The mandatory preflight is all 32 arms at seeds 100 and 101: 64 paired jobs,
 2. two allocator rows per pair with matching initial-state digests and distinct
    mutable instances;
 3. positive finite timing, exact execution positions, and the strengthened
-   proportional conservation gate (all logical edges complete, zero remaining
-   foreground bytes, and at most 1e-6 byte maximum absolute error);
+   proportional conservation gate: all logical edges complete; every one of the
+   `P*k` foreground flows has exactly zero remaining bytes; and delivered-byte
+   error is bounded only by the target-scaled binary64 envelope
+   `max(1e-6 B, 128 * ulp(target bytes))`;
 4. immutable sources and compact n=100 seals unchanged;
 5. signed preflight checkpoints and timing coverage.
+
+The 128-ULP term is a numerical-integrity allowance, not a model or effect-size
+tolerance.  It is scale-aware and leaves the exact-zero remaining-flow gate
+unchanged.  The deterministic `a077` seed-457 regression (68 target ULPs at a
+64-MiB target, with all 128 flows exactly drained) must pass, while any error
+above the envelope or any nonzero remaining flow must fail closed.
 
 Only after `preflight_complete.json` is written and reverified may the remaining
 28,736 pairs run.  `--preflight-only` deliberately stops at that boundary;

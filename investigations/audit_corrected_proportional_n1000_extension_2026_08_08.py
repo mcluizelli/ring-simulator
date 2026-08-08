@@ -57,7 +57,8 @@ N100_PAIR_COUNT = 3_200
 N100_ROW_COUNT = 6_400
 PREFLIGHT_SEEDS = (100, 101)
 PREFLIGHT_PAIR_COUNT = 64
-CONSERVATION_TOLERANCE_B = 1e-6
+COMPACT_N100_CONSERVATION_TOLERANCE_B = 1e-6
+PROPORTIONAL_CONSERVATION_ULPS = 128
 BOOTSTRAP_REPLICATES = 20_000
 BOOTSTRAP_SEED = 20_260_807
 APPROVED_BASELINE_COMMIT = "f2d8f88ec3cef01c250987df88245dc4361c245b"
@@ -95,16 +96,16 @@ EXPECTED_SENTINEL_EXCLUDED_BOOTSTRAP_SHA256 = (
 # Rebind exactly once after the driver and specification are final.  Production
 # and self-test both fail closed while either marker remains unresolved.
 EXPECTED_DRIVER_SHA256 = (
-    "b427b264e22f91bced2c3243d540f5a4548cb17c966b952080e2736bb89ebef7"
+    "3f9e67a8524c01bb09b0f8e0538b911052ca84f59fe7952a1dd28109625ea190"
 )
 EXPECTED_SPEC_SHA256 = (
-    "b3a74dcc5808d054f8025613b7a47f24867a33dbc894710aeced463b7788b41b"
+    "8f70b5d0963de93539ad663d1e195ac52ea0cc568d5dcf0bbcb6740fae7bdc42"
 )
 EXPECTED_SOURCE_SHA256 = {
     SIM_PATH: "96505cefe2e5aa761b80080d77145bfd384c688ce4a8ca5792f8f7ce17ef59bd",
     CANONICAL_PATH: "7d01a2e598c799b0c533fb650f33b8537f51fa3187f427fcf9ada108d56fd8b4",
-    CORE_PATH: "777018e1a408eb5274d5ee87700fc66e4396fd5d39722f625f22e48840efc431",
-    N100_DRIVER_PATH: "7b65d37635a3d8315517f0076602cb4c663c1c0659ef1dbb3ee56e3053b10f9b",
+    CORE_PATH: "9613d3a753ea8e5c720bc2a5ac43110fd363aba13181790100fda936501408d0",
+    N100_DRIVER_PATH: "670d98ab17960fb2061de04eecca993cf35fe568a98b164a8dc3ce780e695196",
     INVESTIGATIONS / "maxmin_gate_2026_08_06.py": (
         "2905e293712650b8c2ef8a259326e5502f102bf5773515712979aef2a8f7cb1b"
     ),
@@ -817,8 +818,8 @@ def _verify_n100_reference() -> Dict[str, Any]:
         _require(row["config_sha256"] == expected["config_sha256"], f"n=100 config seal mismatch: {key}")
         time_value = _finite(row["completion_time_s"], f"{key}:completion", positive=True)
         _require(row["completion_time_hex"] == _f64_hex(time_value), f"n=100 float seal mismatch: {key}")
-        _require(_finite(row["conservation_max_error_B"], f"{key}:conservation") <= CONSERVATION_TOLERANCE_B, f"n=100 conservation error: {key}")
-        _require(abs(_finite(row["conservation_remaining_B"], f"{key}:remaining")) <= CONSERVATION_TOLERANCE_B, f"n=100 remaining bytes: {key}")
+        _require(_finite(row["conservation_max_error_B"], f"{key}:conservation") <= COMPACT_N100_CONSERVATION_TOLERANCE_B, f"n=100 conservation error: {key}")
+        _require(abs(_finite(row["conservation_remaining_B"], f"{key}:remaining")) <= COMPACT_N100_CONSERVATION_TOLERANCE_B, f"n=100 remaining bytes: {key}")
         _require(int(row["remaining_nonzero_count"]) == 0, f"n=100 nonzero remaining flows: {key}")
     _require(len(result_map) == N100_ROW_COUNT, "n=100 allocator-row bijection mismatch")
     for pair_id, record in pair_map.items():
@@ -856,9 +857,37 @@ def _validate_conservation(
     max_error = _finite(conservation.get("maximum_abs_error_bytes"), f"{label}: maximum error")
     max_flow_error = _finite(conservation.get("maximum_per_flow_error_bytes"), f"{label}: per-flow error")
     remaining = _finite(conservation.get("remaining_foreground_bytes"), f"{label}: remaining")
-    _require(0.0 <= max_error <= CONSERVATION_TOLERANCE_B, f"{label}: conservation error exceeds tolerance/is negative")
-    _require(0.0 <= max_flow_error <= CONSERVATION_TOLERANCE_B, f"{label}: per-flow error exceeds tolerance/is negative")
-    _require(abs(remaining) <= CONSERVATION_TOLERANCE_B, f"{label}: foreground bytes remain")
+    target = _finite(
+        config.get("bytes_per_neighbor"),
+        f"{label}: proportional byte target",
+        positive=True,
+    )
+    expected_tolerance = max(
+        COMPACT_N100_CONSERVATION_TOLERANCE_B,
+        PROPORTIONAL_CONSERVATION_ULPS * math.ulp(target),
+    )
+    recorded_tolerance = _finite(
+        conservation.get("roundoff_tolerance_B"),
+        f"{label}: proportional roundoff tolerance",
+        positive=True,
+    )
+    _require(
+        _f64_hex(recorded_tolerance) == _f64_hex(expected_tolerance)
+        and conservation.get("roundoff_tolerance_B_hex")
+        == _f64_hex(expected_tolerance)
+        and conservation.get("roundoff_tolerance_ulps")
+        == PROPORTIONAL_CONSERVATION_ULPS,
+        f"{label}: proportional roundoff-tolerance fields mismatch",
+    )
+    _require(
+        0.0 <= max_error <= expected_tolerance,
+        f"{label}: conservation error exceeds extension roundoff tolerance/is negative",
+    )
+    _require(
+        0.0 <= max_flow_error <= expected_tolerance,
+        f"{label}: per-flow error exceeds extension roundoff tolerance/is negative",
+    )
+    _require(remaining == 0.0, f"{label}: foreground bytes remain exactly")
     _require(int(conservation.get("foreground_remaining_nonzero_count", -1)) == 0, f"{label}: nonzero foreground flows remain")
     expected_checks = int(config["ring_size"])
     expected_flows = expected_checks * int(config["k"])

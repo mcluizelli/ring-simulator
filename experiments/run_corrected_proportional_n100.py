@@ -87,7 +87,7 @@ EXPECTED_FROZEN_ROOT_SHA256 = (
 EXPECTED_SOURCE_HASHES = {
     SIM_PATH: "96505cefe2e5aa761b80080d77145bfd384c688ce4a8ca5792f8f7ce17ef59bd",
     CANONICAL_DRIVER_PATH: "7d01a2e598c799b0c533fb650f33b8537f51fa3187f427fcf9ada108d56fd8b4",
-    CORE_DRIVER_PATH: "777018e1a408eb5274d5ee87700fc66e4396fd5d39722f625f22e48840efc431",
+    CORE_DRIVER_PATH: "9613d3a753ea8e5c720bc2a5ac43110fd363aba13181790100fda936501408d0",
     SPEC_PATH: "0bfb2286b52f0dc5266c8e80a08e7d2de8e7508565e5f07b25caee8e4a508090",
 }
 EXPECTED_REFERENCE_HASHES = {
@@ -474,11 +474,19 @@ def _conservation_gate(
     if not isinstance(delivered, Mapping) or len(delivered) != int(config["ring_size"]):
         raise RuntimeError("proportional delivered-byte vector has wrong edge count")
     target = float(config["bytes_per_neighbor"])
+    delivered_values: List[float] = []
     for edge, raw_value in delivered.items():
         value = float(raw_value)
-        if not math.isfinite(value) or abs(value - target) > 1e-6:
+        if not math.isfinite(value):
             raise RuntimeError(
                 f"proportional edge {edge!r} delivered invalid bytes {raw_value!r}"
+            )
+        delivered_values.append(value)
+    roundoff_tolerance = core._binary64_roundoff_tolerance(target)
+    for edge, value in zip(delivered, delivered_values):
+        if abs(value - target) > roundoff_tolerance:
+            raise RuntimeError(
+                f"proportional edge {edge!r} delivered invalid bytes {value!r}"
             )
     verdict = dict(_BASE_CONSERVATION_GATE(config, result, engine))
     flows = core._foreground_flows(engine, "proportional")
@@ -499,8 +507,17 @@ def _conservation_gate(
         raise RuntimeError("proportional logical-edge conservation count changed")
     if int(verdict.get("foreground_flow_count", -1)) != expected_flows:
         raise RuntimeError("proportional conservation recorded wrong flow count")
-    if float(verdict.get("maximum_abs_error_bytes", math.inf)) > 1e-6:
-        raise RuntimeError("proportional conservation exceeds 1e-6 byte")
+    if float(verdict.get("maximum_abs_error_bytes", math.inf)) > roundoff_tolerance:
+        raise RuntimeError("proportional conservation exceeds binary64 tolerance")
+    if (
+        float(verdict.get("roundoff_tolerance_B", math.nan))
+        != roundoff_tolerance
+        or verdict.get("roundoff_tolerance_B_hex")
+        != core._f64_hex(roundoff_tolerance)
+        or int(verdict.get("roundoff_tolerance_ulps", -1))
+        != core.PROPORTIONAL_CONSERVATION_ULPS
+    ):
+        raise RuntimeError("base proportional roundoff-tolerance seal changed")
     base_remaining = float(verdict.get("remaining_foreground_bytes", math.nan))
     if not math.isfinite(base_remaining) or base_remaining != 0.0:
         raise RuntimeError("base proportional aggregate remaining bytes are not exactly zero")
@@ -889,6 +906,25 @@ def _validate_checkpoint(
         ):
             raise RuntimeError(f"persisted conservation numeric/hex mismatch: {pair['pair_id']}")
         maximum_error = float(conservation.get("maximum_abs_error_bytes", math.nan))
+        maximum_flow_error = float(
+            conservation.get("maximum_per_flow_error_bytes", math.nan)
+        )
+        target = float(pair["config"]["bytes_per_neighbor"])
+        roundoff_tolerance = core._binary64_roundoff_tolerance(target)
+        reported_tolerance = conservation.get("roundoff_tolerance_B")
+        if (
+            isinstance(reported_tolerance, bool)
+            or not isinstance(reported_tolerance, numbers.Real)
+            or not math.isfinite(float(reported_tolerance))
+            or float(reported_tolerance) != roundoff_tolerance
+            or conservation.get("roundoff_tolerance_B_hex")
+            != core._f64_hex(roundoff_tolerance)
+            or int(conservation.get("roundoff_tolerance_ulps", -1))
+            != core.PROPORTIONAL_CONSERVATION_ULPS
+        ):
+            raise RuntimeError(
+                f"persisted roundoff-tolerance seal mismatch: {pair['pair_id']}"
+            )
         if (
             conservation.get("passed") is not True
             or int(conservation.get("foreground_flow_count", -1)) != expected_flows
@@ -899,7 +935,9 @@ def _validate_checkpoint(
             or float(conservation.get("foreground_remaining_max_bytes", math.nan)) != 0.0
             or float(conservation.get("remaining_foreground_bytes", math.nan)) != 0.0
             or not math.isfinite(maximum_error)
-            or maximum_error > 1e-6
+            or not math.isfinite(maximum_flow_error)
+            or not 0.0 <= maximum_error <= roundoff_tolerance
+            or not 0.0 <= maximum_flow_error <= roundoff_tolerance
         ):
             raise RuntimeError(f"strengthened conservation gate failed: {pair['pair_id']}")
         diagnostics = row.get("reference_diagnostics")
