@@ -1,0 +1,11 @@
+{
+  "pair_count": 28800,
+  "pool_wall_sum_s": 1355.107636599976,
+  "recovered_segment_count": 0,
+  "schema": "corrected-proportional-n1000-extension-runtime-v1",
+  "segment_count": 2,
+  "timing_is_operational_not_scientific": true,
+  "total_wall_s": 1355.107636599976,
+  "worker_end_to_end_wall_sum_s": 10430.26629710116,
+  "worker_simulation_wall_sum_s": 9844.82592870749
+}

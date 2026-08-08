@@ -1,0 +1,25 @@
+{
+  "all_conservation_checks_passed": true,
+  "decision": "PENDING_INDEPENDENT_AUDIT_AND_RESEARCH_DECISION",
+  "fixed_sample_no_effect_based_stopping": true,
+  "legacy_v11_or_sentinel_used_as_estimator_input": false,
+  "n100_canonical_config_hashes_recomputed": true,
+  "next_status": "PENDING_INDEPENDENT_AUDIT_AND_RESEARCH_DECISION",
+  "pair_count": 28800,
+  "paper_change_authorized": false,
+  "passed": true,
+  "plan_sha256": "e50cc784ddd281fe73d228330b7e428c4b74df0c158be705cef951587a6741db",
+  "primary_domain": "extension_only_seeds_100_999",
+  "primary_scope": "fixed_matrix_validation_descriptive_not_confirmatory_holdout",
+  "row_count": 57600,
+  "schema": "corrected-proportional-n1000-extension-gate-v1",
+  "secondary_domain": "combined_seeds_0_999",
+  "secondary_is_not_primary": true,
+  "sensitivity_excluded_seed_clusters": [
+    174,
+    199,
+    353,
+    657
+  ],
+  "simulation_count": 57600
+}

@@ -1,0 +1,10 @@
+{
+  "completion_manifest_bytes": 5105071,
+  "completion_manifest_sha256": "60431ebeadde621b085b7cebc5c764bc51df10288ce7940f23d2bf89bda5c66e",
+  "plan_sha256": "e50cc784ddd281fe73d228330b7e428c4b74df0c158be705cef951587a6741db",
+  "run_manifest_bytes": 33992743,
+  "run_manifest_sha256": "cb60b48633a9a3d3ae69eafa273fa8411d03e7ef6aa9033b69df6151d981bf6c",
+  "schema": "corrected-proportional-n1000-extension-complete-v1",
+  "status": "COMPLETE_PENDING_INDEPENDENT_AUDIT_AND_RESEARCH_DECISION",
+  "written_last": true
+}
