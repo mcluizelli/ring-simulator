@@ -8,8 +8,16 @@ paper/paper_review_local.pdf
 paper/paper_submission_local.pdf
 texput.log
 
-# Raw campaign internals are archived separately; compact signed summaries remain visible.
+# Raw campaign internals stay outside source Git; compact signed summaries remain visible.
 investigations/**/checkpoints/
 investigations/**/timing_segments/
 investigations/**/.staging/
-investigations/**/.run.lock
+
+# Failed attempts are retained locally for forensics, not as production evidence.
+investigations/corrected_proportional_n100/n100_2026-08-07_01/
+investigations/rate_allocator_n100/n100_2026-08-06_01/
+investigations/rate_allocator_n100/n100_2026-08-06_02/
+investigations/rate_allocator_pilot/n5_2026-08-06_01/
+investigations/rate_allocator_pilot/n5_2026-08-06_02/
+investigations/**/*.stdout.log
+investigations/**/*.stderr.log
