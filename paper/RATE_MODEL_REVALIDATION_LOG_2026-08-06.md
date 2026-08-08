@@ -861,3 +861,13 @@ paper until the extension passes source binding, preflight, completion sealing,
 independent audit, and the predeclared combined `0..999` analysis. Controller
 recalibration remains a separate Unit 7 and is not bundled with this static
 extension.
+
+The reviewed pre-`n=1000` scientific baseline was published on 2026-08-08 as
+ring-simulator commit `bde20148389772cceab9dd2c81f25e8f26c658ba`; the branch
+then measured `0/0` against `origin/ibrahim-paper`. The canonical Overleaf clone
+remained clean and unchanged at `887efcf` because all six live figure PDFs were
+already byte-identical. Full raw evidence for the successful pilot and `n=100`
+campaigns is retained outside source Git in five read-only, content-addressed
+archives indexed by `SEALED_ARTIFACT_ARCHIVE_INDEX_2026_08_08.json`. The index
+records that no off-machine replica has yet been established; the source trees
+remain present and were not deleted.
