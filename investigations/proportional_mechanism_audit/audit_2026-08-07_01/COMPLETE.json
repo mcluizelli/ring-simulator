@@ -1,0 +1,29 @@
+{
+  "artifacts": {
+    "REPORT.md": {
+      "bytes": 1083,
+      "sha256": "96352a44554c497ce1b85a4daff3c6a9db3aad952ec3035f39ac6c5abde46a37"
+    },
+    "results.csv": {
+      "bytes": 115466,
+      "sha256": "bc231530568d5fc2bd6a93a443462a3554f4a1632304574b34a045722403aafc"
+    },
+    "results.json": {
+      "bytes": 663348,
+      "sha256": "f8b45f5d5f52fbb759091c355b0b4ae42da9c258af4962938590cf8ac80b50e4"
+    },
+    "run_manifest.json": {
+      "bytes": 245014,
+      "sha256": "eada2841cd45992b8f3cba1dc1492a8c389bed3971a476618ef0ee71461e9c87"
+    },
+    "summary.json": {
+      "bytes": 47874,
+      "sha256": "c0d12a69e1f62e38cfa35f9a79d6f68c45aced08b9c81594085aa2d0c654343b"
+    }
+  },
+  "authorization_sha256": "ed839a645fba7c772a6ee82d18fc1128abdde576d940738e61798fe25ae8e9e7",
+  "immutable_final_sha256": "6c20d8ca87368ccd0c2bc0b1bd9e7b9b0b2dfd54552758e701712bce796ba162",
+  "plan_sha256": "701a1de1782bda0713b28accef415ba4f621d10ba770eb67b446e2641eb7d636",
+  "schema": "proportional-mechanism-audit-complete-v1",
+  "status": "STOP_BEFORE_N1000_AND_REVIEW"
+}

@@ -1,0 +1,41 @@
+{
+  "artifacts": {
+    "REPORT.md": {
+      "bytes": 1287,
+      "sha256": "4371de7ec7be0230590809bd7d6f9e1dbcf9f0cdcd4bb4091a17e9ac6d02c1ea"
+    },
+    "production_equivalence.json": {
+      "bytes": 541449,
+      "sha256": "db1bdbd44d0d0a4da55bed10374625a2fc57d364ec954d006985e3b3d69989be"
+    },
+    "results.csv": {
+      "bytes": 132020,
+      "sha256": "ca47c016e3f8d291d6466250c75cac17ea98466c8455830192c45f3936b1796c"
+    },
+    "results.json": {
+      "bytes": 721311,
+      "sha256": "e0ebf4884a6f639823cc33cba8987ad979489482d2cbeb04d8ef8e63fb8c73ec"
+    },
+    "run_manifest.json": {
+      "bytes": 246773,
+      "sha256": "209b22dee69d4daeb7aa532a6f97ad6e31164fddde7af78f120fb2e99ee2c282"
+    },
+    "summary.json": {
+      "bytes": 49932,
+      "sha256": "e6ebe1c698b2f86e22a4c2224bb446ccde31f6a414e2967bfa455e524b5f892d"
+    },
+    "v1_historical_deltas.csv": {
+      "bytes": 12804,
+      "sha256": "21543c4dca256421f0d4b9a7a7f73c320e66f25dd3974498bb9309332335686c"
+    },
+    "v1_historical_deltas.json": {
+      "bytes": 51665,
+      "sha256": "5ab1a302fcc2f78b4eee729024dab61a5696c0cae96a92b25e044b91911a1e82"
+    }
+  },
+  "authorization_sha256": "d7520a47a3c075574cf5ae5d20c27670f3c235ec01eb82b03b410ab2103477d8",
+  "immutable_final_sha256": "fdb2134ea14c001fd13ff85ab26a8fd63274ac916c8fcdb2514f3b1f978a54ba",
+  "plan_sha256": "48e71db797a6f60683fd29a62c4580be4021341579b8f51836974090a1052cf4",
+  "schema": "proportional-mechanism-audit-complete-v2",
+  "status": "PASS_READY_FOR_PROPORTIONAL_N100_REVALIDATION"
+}

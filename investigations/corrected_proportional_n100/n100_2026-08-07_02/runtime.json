@@ -1,0 +1,16 @@
+{
+  "completed_pairs_per_pool_second": 22.165259966911304,
+  "elapsed_pool_wall_sum_min": 2.406167733333617,
+  "elapsed_pool_wall_sum_s": 144.370064000017,
+  "historical_linear_estimate_min": 2.19,
+  "n1000_eta_reported": false,
+  "predeclared_operational_allowance_min": [
+    3.5,
+    5.0
+  ],
+  "schema": "corrected-proportional-n100-runtime-v1",
+  "timing_segment_count": 2,
+  "worker_end_to_end_wall_sum_s": 1104.9001982003683,
+  "worker_simulation_wall_sum_s": 1041.8389543000376,
+  "workers": 8
+}

@@ -1,0 +1,42 @@
+{
+  "named_anchors_checked": [
+    "a072_proportional_3tier_os4_p64_k16__s033:link_local_equal_share:6.30ms",
+    "a079_proportional_2tier_p64_k8__s066:network_maxmin:6.15ms"
+  ],
+  "pair_count": 30,
+  "pair_ids": [
+    "a069_proportional_3tier_os4_p64_k2__s000",
+    "a069_proportional_3tier_os4_p64_k2__s011",
+    "a069_proportional_3tier_os4_p64_k2__s022",
+    "a069_proportional_3tier_os4_p64_k2__s033",
+    "a069_proportional_3tier_os4_p64_k2__s044",
+    "a069_proportional_3tier_os4_p64_k2__s055",
+    "a069_proportional_3tier_os4_p64_k2__s066",
+    "a069_proportional_3tier_os4_p64_k2__s077",
+    "a069_proportional_3tier_os4_p64_k2__s088",
+    "a069_proportional_3tier_os4_p64_k2__s099",
+    "a072_proportional_3tier_os4_p64_k16__s000",
+    "a072_proportional_3tier_os4_p64_k16__s011",
+    "a072_proportional_3tier_os4_p64_k16__s022",
+    "a072_proportional_3tier_os4_p64_k16__s033",
+    "a072_proportional_3tier_os4_p64_k16__s044",
+    "a072_proportional_3tier_os4_p64_k16__s055",
+    "a072_proportional_3tier_os4_p64_k16__s066",
+    "a072_proportional_3tier_os4_p64_k16__s077",
+    "a072_proportional_3tier_os4_p64_k16__s088",
+    "a072_proportional_3tier_os4_p64_k16__s099",
+    "a079_proportional_2tier_p64_k8__s000",
+    "a079_proportional_2tier_p64_k8__s011",
+    "a079_proportional_2tier_p64_k8__s022",
+    "a079_proportional_2tier_p64_k8__s033",
+    "a079_proportional_2tier_p64_k8__s044",
+    "a079_proportional_2tier_p64_k8__s055",
+    "a079_proportional_2tier_p64_k8__s066",
+    "a079_proportional_2tier_p64_k8__s077",
+    "a079_proportional_2tier_p64_k8__s088",
+    "a079_proportional_2tier_p64_k8__s099"
+  ],
+  "passed": true,
+  "require_all": true,
+  "row_count": 60
+}

@@ -1,0 +1,9 @@
+{
+  "completion_manifest_bytes": 574481,
+  "completion_manifest_sha256": "6355cda3b07e025da2e88c8544a1a82760212510203e1b5f0ba08930c6691810",
+  "n1000_started": false,
+  "plan_sha256": "0a6782b08e57ea0f6a995946ec7f950d8ed1c2c0936b65e74d4d743bd4abc560",
+  "schema": "corrected-proportional-n100-complete-v1",
+  "status": "READY_TO_DECIDE_PROPORTIONAL_N1000_SCOPE",
+  "written_last": true
+}
