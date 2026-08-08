@@ -1313,6 +1313,15 @@ def _verify_completion_bundle(output: Path) -> Tuple[Dict[str, Any], Dict[str, A
         path_token = Path(relative)
         _require(isinstance(relative, str) and relative and not path_token.is_absolute() and ".." not in path_token.parts, f"unsafe completion artifact path: {relative}")
         _require(isinstance(signature, dict), f"malformed completion signature: {relative}")
+        _require(
+            set(signature)
+            == (
+                {"bytes", "sha256", "hashed_via_held_handle"}
+                if relative == ".run.lock"
+                else {"bytes", "sha256"}
+            ),
+            f"completion signature key set mismatch: {relative}",
+        )
         path = output / relative
         _require(path.is_file(), f"signed completion artifact is missing: {relative}")
         _require(int(signature.get("bytes", -1)) == path.stat().st_size and signature.get("sha256") == _sha256_file(path), f"signed artifact drift: {relative}")

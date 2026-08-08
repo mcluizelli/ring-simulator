@@ -342,6 +342,7 @@ class CorrectedProportionalN1000ExtensionAuditorTests(unittest.TestCase):
             "phase": "recovered_after_interruption",
             "recovered_after_interruption": True,
             "pair_ids": pair_ids,
+            "pair_count": len(pair_ids),
             "elapsed_pool_wall_s": 1.5,
             "worker_end_to_end_wall_sum_s": sum(
                 row["wall_time_s"]
