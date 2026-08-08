@@ -1,0 +1,61 @@
+{
+  "archives": [
+    {
+      "archive": "rate_allocator_pilot_n5_03.tar.gz",
+      "archive_bytes": 97108,
+      "archive_sha256": "97c4a6530b5079bf92dac10d7ec9f6e21e68c2f85b0cb5fd9d47bf3658cc823b",
+      "file_count": 98,
+      "source": "investigations/rate_allocator_pilot/n5_2026-08-06_03",
+      "source_bytes": 956462,
+      "tree_sha256": "bdf0ea685e9cd3db0e435030cac751e92e54268f41bb883ea5b4caa0c9b82c98"
+    },
+    {
+      "archive": "rate_allocator_n100_03.tar.gz",
+      "archive_bytes": 11081061,
+      "archive_sha256": "c4b378bed3da97d3604027ecb7a30b9456fd9939eb9c6b1c5d576e61630af718",
+      "file_count": 13409,
+      "source": "investigations/rate_allocator_n100/n100_2026-08-06_03",
+      "source_bytes": 132732981,
+      "tree_sha256": "7e119d4c8169a7e90a0d6773528bdd358e53056df0962ff4ee8b942098d14ab1"
+    },
+    {
+      "archive": "proportional_audit_v1_01.tar.gz",
+      "archive_bytes": 63071,
+      "archive_sha256": "436da583e78abe1112bf52a434739441e1890cf7d68d65997e5315fe41abf944",
+      "file_count": 6,
+      "source": "investigations/proportional_mechanism_audit/audit_2026-08-07_01",
+      "source_bytes": 1073857,
+      "tree_sha256": "05352327fb4c0caf443680a357df63477a490b008cece0cd8713c9d2959eed9a"
+    },
+    {
+      "archive": "proportional_audit_v2_01.tar.gz",
+      "archive_bytes": 99609,
+      "archive_sha256": "c34007196387b113e8e8cbfe68db7c2447b3347bfe917f791830bb5ff2f45828",
+      "file_count": 9,
+      "source": "investigations/proportional_mechanism_audit_v2/audit_v2_2026-08-07_01",
+      "source_bytes": 1758773,
+      "tree_sha256": "b6c655db9ceb1fb95ee8e12597309822530392d980002dfc1dbba521e7ae7c50"
+    },
+    {
+      "archive": "corrected_proportional_n100_02.tar.gz",
+      "archive_bytes": 2749685,
+      "archive_sha256": "cfe96c6f7a5ed47ab49c855cccd40e1dc667eac2db5116e22b86d472cfc3c4d9",
+      "file_count": 3219,
+      "source": "investigations/corrected_proportional_n100/n100_2026-08-07_02",
+      "source_bytes": 41716088,
+      "tree_sha256": "af6a6e4dca261a7b7c8af517e5c5a189177cfe0546aef94a4d09f34157bcd3cd"
+    }
+  ],
+  "bundle_location": "../sealed-artifact-bundles/pre_n1000_2026-08-08_01",
+  "created_local": "2026-08-08",
+  "repository_commit_before_index": "23e33b53751b022aca04e8873f013106cdf61a2c",
+  "schema": "pre-n1000-sealed-artifact-index-v1",
+  "source_trees_retained": true,
+  "storage": {
+    "content_addressed": true,
+    "outside_source_git": true,
+    "read_only_after_verification": true,
+    "remote_replica_recorded": false
+  },
+  "tree_digest_contract": "SHA-256 of compact sorted JSON rows [relative_path, byte_count, file_sha256], with paths relative to each source tree"
+}
