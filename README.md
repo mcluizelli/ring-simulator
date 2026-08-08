@@ -147,16 +147,18 @@ Each simulation step performs the following operations:
 1. Background traffic generation
 2. Congestion updates
 3. Link flow aggregation
-4. Fair bandwidth allocation
+4. Link-local equal-share allocation
 5. Data transmission update
 
-Bandwidth sharing is modeled as **max-min fairness per link**:
+Bandwidth sharing is modeled by the **link-local equal-share bottleneck-rate model**:
 
 ```
 link_share = link_capacity / number_of_flows
 ```
 
 The flow rate becomes the **minimum share along its path**.
+This local-share model does not recycle capacity stranded at an upstream link by a flow
+bottlenecked elsewhere; it is not network-wide max-min.
 
 ---
 

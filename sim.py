@@ -1,14 +1,21 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict, List, Tuple, Optional, Iterable
+from typing import Dict, Iterable, List, Mapping, Optional, Sequence, Tuple
 import hashlib
+import heapq
 import math
 import random
 
 
 Node = str
 Edge = Tuple[Node, Node]  # directed (u -> v)
+
+RATE_ALLOCATOR_LINK_LOCAL = "link_local_equal_share"
+RATE_ALLOCATOR_NETWORK_MAXMIN = "network_maxmin"
+_SUPPORTED_RATE_ALLOCATORS = frozenset(
+    {RATE_ALLOCATOR_LINK_LOCAL, RATE_ALLOCATOR_NETWORK_MAXMIN}
+)
 
 
 # ----------------------------
@@ -22,6 +29,180 @@ def stable_hash_int(*parts: object) -> int:
         h.update(str(p).encode("utf-8"))
         h.update(b"|")
     return int.from_bytes(h.digest(), "big")
+
+
+def _validate_rate_allocator(rate_allocator: str) -> str:
+    if rate_allocator not in _SUPPORTED_RATE_ALLOCATORS:
+        supported = ", ".join(sorted(_SUPPORTED_RATE_ALLOCATORS))
+        raise ValueError(
+            f"Unknown rate_allocator {rate_allocator!r}; supported: {supported}."
+        )
+    return rate_allocator
+
+
+def _within_ulps(left: float, right: float, ulps: int = 32) -> bool:
+    """Return whether two finite floats differ only by rounding-scale noise."""
+    if left == right:
+        return True
+    if not math.isfinite(left) or not math.isfinite(right):
+        return False
+    tolerance = ulps * max(math.ulp(left), math.ulp(right))
+    return abs(left - right) <= tolerance
+
+
+def allocate_flow_rates(
+    flow_edges: Mapping[int, Sequence[Edge]],
+    capacities: Mapping[Edge, float],
+    rate_allocator: str = RATE_ALLOCATOR_LINK_LOCAL,
+) -> Dict[int, float]:
+    """Allocate rates to fixed-path flows under the selected fluid model.
+
+    ``link_local_equal_share`` divides every directed link independently among
+    its users and assigns each flow the minimum share on its path.
+    ``network_maxmin`` performs network-wide unweighted progressive filling.
+    A pathless flow has infinite rate in both modes, matching simulator
+    semantics. Capacities are bytes/s and must be finite and non-negative.
+    """
+    _validate_rate_allocator(rate_allocator)
+
+    users: Dict[Edge, List[int]] = {}
+    normalized_paths: Dict[int, Tuple[Edge, ...]] = {}
+    normalized_capacities: Dict[Edge, float] = {}
+    for fid, path in flow_edges.items():
+        edges = tuple(path)
+        if len(set(edges)) != len(edges):
+            raise ValueError(f"Flow {fid} traverses the same directed edge twice.")
+        normalized_paths[fid] = edges
+        for edge in edges:
+            users.setdefault(edge, []).append(fid)
+            if edge not in normalized_capacities:
+                cap = float(capacities.get(edge, 0.0))
+                if not math.isfinite(cap) or cap < 0.0:
+                    raise ValueError(
+                        f"Capacity for edge {edge!r} must be finite and non-negative."
+                    )
+                normalized_capacities[edge] = cap
+
+    if rate_allocator == RATE_ALLOCATOR_LINK_LOCAL:
+        rates: Dict[int, float] = {}
+        for fid, edges in normalized_paths.items():
+            if not edges:
+                rates[fid] = float("inf")
+            else:
+                rates[fid] = min(
+                    normalized_capacities[edge] / len(users[edge]) for edge in edges
+                )
+        return rates
+
+    return _allocate_network_maxmin(
+        normalized_paths,
+        users,
+        normalized_capacities,
+    )
+
+
+def _allocate_network_maxmin(
+    flow_edges: Mapping[int, Sequence[Edge]],
+    users: Mapping[Edge, Sequence[int]],
+    capacities: Mapping[Edge, float],
+) -> Dict[int, float]:
+    """Heap-based unweighted progressive filling over validated fixed paths."""
+    rates = {
+        fid: (0.0 if edges else float("inf"))
+        for fid, edges in flow_edges.items()
+    }
+    unfrozen = {fid for fid, edges in flow_edges.items() if edges}
+    if not unfrozen:
+        return rates
+
+    normalized_capacities: Dict[Edge, float] = {}
+    for edge in users:
+        cap = float(capacities.get(edge, 0.0))
+        if not math.isfinite(cap) or cap < 0.0:
+            raise ValueError(
+                f"Capacity for edge {edge!r} must be finite and non-negative."
+            )
+        normalized_capacities[edge] = cap
+
+    active_counts = {edge: len(fids) for edge, fids in users.items()}
+    frozen_load = {edge: 0.0 for edge in users}
+    water_level = 0.0
+    versions = {edge: 0 for edge in users}
+    queue: List[Tuple[float, int, Edge, int]] = []
+    serial = 0
+
+    def push_candidate(edge: Edge) -> None:
+        nonlocal serial
+        count = active_counts[edge]
+        if count <= 0:
+            return
+        available = normalized_capacities[edge] - frozen_load[edge]
+        if available < 0.0:
+            edge_tolerance = 32 * max(
+                math.ulp(normalized_capacities[edge]),
+                math.ulp(frozen_load[edge]),
+            )
+            if available < -edge_tolerance:
+                raise RuntimeError(
+                    "Progressive filling produced negative residual capacity."
+                )
+            available = 0.0
+        level = max(0.0, available) / count
+        if level < water_level:
+            if not _within_ulps(level, water_level):
+                raise RuntimeError("Progressive filling candidate regressed.")
+            level = water_level
+        serial += 1
+        heapq.heappush(queue, (level, serial, edge, versions[edge]))
+
+    for edge in users:
+        push_candidate(edge)
+
+    while unfrozen:
+        while queue:
+            level, _, edge, version = heapq.heappop(queue)
+            if versions[edge] == version and active_counts[edge] > 0:
+                break
+        else:
+            raise RuntimeError("An active flow has no finite-capacity resource.")
+
+        water_level = max(water_level, level)
+        limiting = [edge]
+        while queue:
+            candidate, _, candidate_edge, candidate_version = queue[0]
+            if (
+                versions[candidate_edge] != candidate_version
+                or active_counts[candidate_edge] <= 0
+            ):
+                heapq.heappop(queue)
+                continue
+            if not _within_ulps(candidate, water_level):
+                break
+            heapq.heappop(queue)
+            limiting.append(candidate_edge)
+
+        newly_frozen = {
+            fid
+            for edge in limiting
+            for fid in users[edge]
+            if fid in unfrozen
+        }
+        if not newly_frozen:
+            raise RuntimeError("Progressive filling made no progress.")
+
+        touched_edges = set()
+        for fid in newly_frozen:
+            rates[fid] = water_level
+            for edge in flow_edges[fid]:
+                active_counts[edge] -= 1
+                frozen_load[edge] += water_level
+                touched_edges.add(edge)
+        unfrozen.difference_update(newly_frozen)
+        for edge in touched_edges:
+            versions[edge] += 1
+            push_candidate(edge)
+
+    return rates
 
 
 # ----------------------------
@@ -620,8 +801,8 @@ class FlowLevelSimulator:
     """
     Discrete-time fluid model:
       - ECMP pins each flow to exactly one equal-cost path
-      - each directed link shares capacity equally among flows using it
-      - each flow gets bottleneck share along its path
+      - directed-link capacity is allocated by the selected rate model
+      - the default preserves the historical link-local equal-share behavior
     """
 
     def __init__(
@@ -630,9 +811,11 @@ class FlowLevelSimulator:
         dt_s: float = 5e-5,
         congestion: Optional[CongestionModel] = None,
         background: Optional[BackgroundTrafficGenerator] = None,
+        rate_allocator: str = RATE_ALLOCATOR_LINK_LOCAL,
     ) -> None:
         if dt_s <= 0:
             raise ValueError("dt_s must be positive.")
+        self.rate_allocator = _validate_rate_allocator(rate_allocator)
         self.topo = topo
         self.dt_s = dt_s
         self.time_s: float = 0.0
@@ -653,6 +836,9 @@ class FlowLevelSimulator:
             self.congestion.attach(all_edges, target_edges=target)
 
         self.background = background
+        self._maxmin_active_key: Optional[Tuple[int, ...]] = None
+        self._maxmin_flow_edges: Dict[int, Tuple[Edge, ...]] = {}
+        self._maxmin_link_users: Dict[Edge, List[int]] = {}
 
     def add_flow(self, five_tuple: Flow5Tuple, bytes_to_send: float) -> int:
         if bytes_to_send <= 0:
@@ -671,6 +857,41 @@ class FlowLevelSimulator:
 
     def _flow_edges(self, f: Flow) -> List[Edge]:
         return self._path_edges(f.path)
+
+    def snapshot_flow_rates(self, flow_ids: Sequence[int]) -> Dict[int, float]:
+        """Return current rates for an explicit candidate set without mutation.
+
+        The caller defines the complete simultaneous candidate set; an idle
+        persistent flow may therefore be included even when its current
+        ``remaining_bytes`` is zero. Residual capacities are sampled from the
+        current congestion state, but time, bytes, last rates, congestion, and
+        the max-min active-set cache are left unchanged.
+        """
+        ordered = tuple(flow_ids)
+        if len(set(ordered)) != len(ordered):
+            raise ValueError("snapshot_flow_rates requires unique flow IDs")
+        unknown = [fid for fid in ordered if fid not in self.flows]
+        if unknown:
+            raise ValueError(f"snapshot_flow_rates received unknown flow IDs: {unknown}")
+
+        flow_edges = {
+            fid: tuple(self._flow_edges(self.flows[fid])) for fid in ordered
+        }
+        capacities: Dict[Edge, float] = {}
+        for edges in flow_edges.values():
+            for edge in edges:
+                if edge in capacities:
+                    continue
+                nominal = self.topo.edge_of.get(edge, 0.0)
+                capacity = nominal
+                if self.congestion is not None:
+                    capacity = self.congestion.residual_capacity(edge, nominal)
+                capacities[edge] = capacity
+        return allocate_flow_rates(
+            flow_edges,
+            capacities,
+            rate_allocator=self.rate_allocator,
+        )
 
     def get_edge_avg_throughput(self, edges: Optional[List[Edge]] = None) -> Dict[Edge, float]:
         """Average throughput (bytes/s) on each edge over the simulation so far."""
@@ -692,28 +913,58 @@ class FlowLevelSimulator:
 
         active = [f for f in self.flows.values() if f.remaining_bytes > 0]
 
-        # link -> flow list
-        link_users: Dict[Edge, List[int]] = {}
-        for f in active:
-            for e in self._flow_edges(f):
-                link_users.setdefault(e, []).append(f.fid)
+        if self.rate_allocator == RATE_ALLOCATOR_LINK_LOCAL:
+            # Preserve the historical operation and iteration order exactly.
+            link_users: Dict[Edge, List[int]] = {}
+            for f in active:
+                for e in self._flow_edges(f):
+                    link_users.setdefault(e, []).append(f.fid)
 
-        # compute per-link fair share using effective capacity
-        link_share: Dict[Edge, float] = {}
-        for e, fids in link_users.items():
-            nominal = self.topo.edge_of.get(e, 0.0)
-            cap = nominal
-            if self.congestion is not None:
-                cap = self.congestion.residual_capacity(e, nominal)
-            link_share[e] = (cap / max(1, len(fids))) if cap > 0 else 0.0
+            link_share: Dict[Edge, float] = {}
+            for e, fids in link_users.items():
+                nominal = self.topo.edge_of.get(e, 0.0)
+                cap = nominal
+                if self.congestion is not None:
+                    cap = self.congestion.residual_capacity(e, nominal)
+                link_share[e] = (cap / max(1, len(fids))) if cap > 0 else 0.0
 
-        # per-flow bottleneck rate
-        for f in active:
-            edges = self._flow_edges(f)
-            if not edges:
-                f.last_rate_Bps = float("inf")
+            for f in active:
+                edges = self._flow_edges(f)
+                if not edges:
+                    f.last_rate_Bps = float("inf")
+                else:
+                    f.last_rate_Bps = min(link_share.get(e, 0.0) for e in edges)
+        else:
+            active_key = tuple(f.fid for f in active)
+            if active_key != self._maxmin_active_key:
+                flow_edges = {
+                    f.fid: tuple(self._flow_edges(f)) for f in active
+                }
+                link_users = {}
+                for fid, edges in flow_edges.items():
+                    for e in edges:
+                        link_users.setdefault(e, []).append(fid)
+                self._maxmin_active_key = active_key
+                self._maxmin_flow_edges = flow_edges
+                self._maxmin_link_users = link_users
             else:
-                f.last_rate_Bps = min(link_share.get(e, 0.0) for e in edges)
+                flow_edges = self._maxmin_flow_edges
+                link_users = self._maxmin_link_users
+
+            capacities: Dict[Edge, float] = {}
+            for e in link_users:
+                nominal = self.topo.edge_of.get(e, 0.0)
+                cap = nominal
+                if self.congestion is not None:
+                    cap = self.congestion.residual_capacity(e, nominal)
+                capacities[e] = cap
+            rates = _allocate_network_maxmin(
+                flow_edges,
+                link_users,
+                capacities,
+            )
+            for f in active:
+                f.last_rate_Bps = rates[f.fid]
 
         # advance bytes
         for f in active:
@@ -724,7 +975,12 @@ class FlowLevelSimulator:
             f.remaining_bytes -= send
             f.sent_bytes += send
             if send > 0:
-                for e in self._flow_edges(f):
+                edges = (
+                    self._maxmin_flow_edges[f.fid]
+                    if self.rate_allocator == RATE_ALLOCATOR_NETWORK_MAXMIN
+                    else self._flow_edges(f)
+                )
+                for e in edges:
                     self.edge_bytes_sent[e] = self.edge_bytes_sent.get(e, 0.0) + send
 
         self.time_s += self.dt_s
@@ -840,6 +1096,7 @@ def run_ring_allreduce(
     congestion: Optional[CongestionModel] = None,
     background_cfg: Optional[BackgroundTrafficConfig] = None,
     max_steps: int = 15_000_000,
+    rate_allocator: str = RATE_ALLOCATOR_LINK_LOCAL,
 ) -> AllReduceResult:
     if total_bytes_M <= 0:
         raise ValueError("total_bytes_M must be positive.")
@@ -850,7 +1107,13 @@ def run_ring_allreduce(
         raise ValueError("pipeline_window must be >= 1.")
 
     background = BackgroundTrafficGenerator(topo, background_cfg) if background_cfg is not None else None
-    sim = FlowLevelSimulator(topo, dt_s=dt_s, congestion=congestion, background=background)
+    sim = FlowLevelSimulator(
+        topo,
+        dt_s=dt_s,
+        congestion=congestion,
+        background=background,
+        rate_allocator=rate_allocator,
+    )
 
     chunk_bytes = total_bytes_M / P
     steps_each_phase = P - 1
@@ -926,11 +1189,14 @@ def compute_ring_theoretical_time(
     base_sport: int = 10000,
     dport: int = 20000,
     proto: int = 6,
+    rate_allocator: str = RATE_ALLOCATOR_LINK_LOCAL,
 ) -> Dict:
     """
-    Compute the theoretical completion time for a ring transfer WITHOUT
-    running a simulation.  Replicates the exact 5-tuple construction from
-    add_ring_neighbor_flows() so that ECMP path selection is identical.
+    Compute a static full-concurrency reference WITHOUT running a simulation.
+    Replicates the exact 5-tuple construction from add_ring_neighbor_flows()
+    so that ECMP path selection is identical. Rates use ``rate_allocator`` and
+    stay fixed in this calculation; an actual simulation recomputes rates as
+    flows finish or residual capacities change.
 
     Returns dict with:
         theoretical_time_s        – bytes_per_neighbor / B*
@@ -938,12 +1204,16 @@ def compute_ring_theoretical_time(
         per_logical_edge_throughput – {(src,dst): throughput_Bps}
         edge_contention            – {physical_edge: num_ring_flows}
     """
+    _validate_rate_allocator(rate_allocator)
     P = len(ring)
     per_flow_bytes = bytes_per_neighbor / flows_per_neighbor
 
     # 1. Build 5-tuples and get ECMP paths (identical logic to add_ring_neighbor_flows)
     logical_edge_flows: Dict[Edge, List[List[Node]]] = {}  # (src,dst) -> list of paths
     edge_flow_count: Dict[Edge, int] = {}  # physical edge -> count
+    flow_paths: Dict[int, List[Edge]] = {}
+    flow_logical_edges: Dict[int, Edge] = {}
+    next_fid = 1
 
     for i in range(P):
         src = ring[i]
@@ -963,24 +1233,42 @@ def compute_ring_theoretical_time(
 
             # Count contention on each physical edge
             path_edges = list(zip(path[:-1], path[1:]))
+            flow_paths[next_fid] = path_edges
+            flow_logical_edges[next_fid] = logical_edge
+            next_fid += 1
             for e in path_edges:
                 edge_flow_count[e] = edge_flow_count.get(e, 0) + 1
 
-    # 2. For each flow, compute bottleneck rate = min(link_cap / contention) over its path
+    # 2. Compute fixed-path rates, then aggregate sub-flows by logical ring edge.
     per_logical_edge_throughput: Dict[Edge, float] = {}
-
-    for logical_edge, paths in logical_edge_flows.items():
-        total_throughput = 0.0
-        for path in paths:
-            path_edges = list(zip(path[:-1], path[1:]))
-            if not path_edges:
-                continue
-            flow_rate = min(
-                topo.edge_of.get(e, 0.0) / max(1, edge_flow_count.get(e, 1))
-                for e in path_edges
-            )
-            total_throughput += flow_rate
-        per_logical_edge_throughput[logical_edge] = total_throughput
+    if rate_allocator == RATE_ALLOCATOR_LINK_LOCAL:
+        # Preserve the historical arithmetic and iteration order exactly.
+        for logical_edge, paths in logical_edge_flows.items():
+            total_throughput = 0.0
+            for path in paths:
+                path_edges = list(zip(path[:-1], path[1:]))
+                if not path_edges:
+                    continue
+                flow_rate = min(
+                    topo.edge_of.get(e, 0.0) / max(1, edge_flow_count.get(e, 1))
+                    for e in path_edges
+                )
+                total_throughput += flow_rate
+            per_logical_edge_throughput[logical_edge] = total_throughput
+    else:
+        capacities = {edge: topo.edge_of.get(edge, 0.0) for edge in edge_flow_count}
+        flow_rates = allocate_flow_rates(
+            flow_paths,
+            capacities,
+            rate_allocator=rate_allocator,
+        )
+        per_logical_edge_throughput = {
+            logical_edge: 0.0 for logical_edge in logical_edge_flows
+        }
+        for fid, flow_rate in flow_rates.items():
+            if math.isfinite(flow_rate):
+                logical_edge = flow_logical_edges[fid]
+                per_logical_edge_throughput[logical_edge] += flow_rate
 
     # 3. Bottleneck = min logical-edge throughput
     bottleneck_bw = min(per_logical_edge_throughput.values()) if per_logical_edge_throughput else 0.0
@@ -1004,6 +1292,7 @@ def run_simple_ring_transfer(
     background_cfg: Optional[BackgroundTrafficConfig] = None,
     max_steps: int = 12_000_000,
     return_metrics: bool = False,
+    rate_allocator: str = RATE_ALLOCATOR_LINK_LOCAL,
 ):
     """
     Run a simple ring neighbor transfer.
@@ -1018,7 +1307,13 @@ def run_simple_ring_transfer(
     """
     background = BackgroundTrafficGenerator(topo, background_cfg) if background_cfg is not None else None
 
-    sim = FlowLevelSimulator(topo, dt_s=dt_s, congestion=congestion, background=background)
+    sim = FlowLevelSimulator(
+        topo,
+        dt_s=dt_s,
+        congestion=congestion,
+        background=background,
+        rate_allocator=rate_allocator,
+    )
 
     ring_fids = add_ring_neighbor_flows(sim, ring, bytes_per_neighbor, flows_per_neighbor=flows_per_neighbor)
 
@@ -1050,7 +1345,11 @@ def run_simple_ring_transfer(
 
     # Static theoretical analysis (only meaningful without congestion/background)
     theory = compute_ring_theoretical_time(
-        topo, ring, bytes_per_neighbor, flows_per_neighbor
+        topo,
+        ring,
+        bytes_per_neighbor,
+        flows_per_neighbor,
+        rate_allocator=rate_allocator,
     )
 
     return {
@@ -1077,6 +1376,7 @@ def run_ring_transfer_proportional(
     congestion: Optional[CongestionModel] = None,
     max_steps: int = 12_000_000,
     return_metrics: bool = False,
+    rate_allocator: str = RATE_ALLOCATOR_LINK_LOCAL,
 ):
     """
     Ring neighbor transfer with THROUGHPUT-PROPORTIONAL (flexible) byte split.
@@ -1085,24 +1385,35 @@ def run_ring_transfer_proportional(
 
     Identical flow construction to run_simple_ring_transfer (same 5-tuples ->
     same ECMP paths), but every `window_s` the REMAINING bytes of each logical
-    edge are re-divided across its k sub-flows in proportion to their measured
-    rates (Flow.last_rate_Bps), instead of the static equal 1/k split.  A flow
-    on a fast path therefore carries more bytes and all sub-flows of an edge
-    finish together — the fluid-model idealization of proportional chunk
-    scheduling across QPs (cf. NCCL_IB_SPLIT_DATA_ON_QPS, which splits equally).
+    edge are re-divided across its k sub-flows in proportion to prospective
+    rates under the current boundary-capacity snapshot, instead of the static
+    equal 1/k split. A flow on a fast path therefore carries more bytes, and the
+    split equalizes predicted drain times if that snapshot remains fixed — the
+    fluid-model idealization of proportional chunk scheduling across QPs (cf.
+    NCCL_IB_SPLIT_DATA_ON_QPS, which splits equally).
 
     Notes:
-      - In this fluid model a flow's rate depends only on the SET of active
-        flows (max-min share), not on its remaining bytes, so the proportional
-        allocation converges after the first window; subsequent windows only
-        react to regime changes (an edge finishing, congestion ticks).
+      - Each boundary computes one global, read-only rate allocation across all
+        QPs of all live logical edges. Idle persistent QPs are included; QPs of
+        completed logical edges are not. The split takes effect in the next
+        tick and does not predict a future congestion transition.
       - Redistribution conserves each logical edge's remaining bytes exactly.
-      - Upper bound: compute_ring_theoretical_time (optimal split over the SAME
-        hashed paths); this runner may approach but should not beat it (beyond
-        the ~1% early-finish slack the equal-split runner also enjoys).
+      - compute_ring_theoretical_time is a static full-concurrency reference
+        over the same hashed paths, not a universal upper or lower bound on this
+        dynamic runner.
     """
-    sim = FlowLevelSimulator(topo, dt_s=dt_s, congestion=congestion)
+    sim = FlowLevelSimulator(
+        topo,
+        dt_s=dt_s,
+        congestion=congestion,
+        rate_allocator=rate_allocator,
+    )
     ring_fids = add_ring_neighbor_flows(sim, ring, bytes_per_neighbor, flows_per_neighbor=flows_per_neighbor)
+    if any(not sim._flow_edges(sim.flows[fid]) for fid in ring_fids):
+        raise RuntimeError(
+            "Proportional redistribution requires a non-empty path for every "
+            "controlled QP."
+        )
 
     # group flows by logical edge
     P = len(ring)
@@ -1111,6 +1422,7 @@ def run_ring_transfer_proportional(
     for _ in range(P):
         edge_fids.append(ring_fids[idx: idx + flows_per_neighbor])
         idx += flows_per_neighbor
+    ring_fid_set = set(ring_fids)
 
     window_ticks = max(1, int(round(window_s / dt_s)))
 
@@ -1130,20 +1442,42 @@ def run_ring_transfer_proportional(
             return _finish()
         sim.step()
         steps += 1
-        # Redistribute immediately after the first step (rates are known and, in
-        # the fluid model, constant until a regime change), then every window.
+        # Redistribute immediately after the first step, then every window.
         if flows_per_neighbor > 1 and (steps == 1 or steps % window_ticks == 0):
+            live_edges = []
             for fids in edge_fids:
                 flows = [sim.flows[fid] for fid in fids]
                 rem_total = sum(max(0.0, f.remaining_bytes) for f in flows)
                 if rem_total <= 0:
                     continue
-                rates = [max(0.0, getattr(f, "last_rate_Bps", 0.0)) for f in flows]
-                rate_sum = sum(r for r in rates if math.isfinite(r))
+                live_edges.append((fids, flows, rem_total))
+
+            if not live_edges:
+                continue
+
+            live_ring_fids = {
+                fid for fids, _, _ in live_edges for fid in fids
+            }
+            candidate_fids = [
+                fid
+                for fid, flow in sim.flows.items()
+                if fid in live_ring_fids
+                or (fid not in ring_fid_set and flow.remaining_bytes > 0.0)
+            ]
+            snapshot_rates = sim.snapshot_flow_rates(candidate_fids)
+
+            for fids, flows, rem_total in live_edges:
+                rates = [float(snapshot_rates[fid]) for fid in fids]
+                if any(not math.isfinite(rate) or rate < 0.0 for rate in rates):
+                    raise RuntimeError(
+                        "Proportional redistribution requires finite, non-negative "
+                        "rates for every controlled QP."
+                    )
+                rate_sum = sum(rates)
                 if rate_sum <= 0:
-                    continue  # nothing measurable this window; keep current split
+                    continue  # no capacity in this snapshot; keep the current split
                 for f, r in zip(flows, rates):
-                    f.remaining_bytes = rem_total * (r / rate_sum if math.isfinite(r) else 0.0)
+                    f.remaining_bytes = rem_total * (r / rate_sum)
     raise RuntimeError("Proportional ring transfer did not finish within max_steps.")
 
 
@@ -1156,6 +1490,7 @@ def run_adaptive_ring_transfer(
     congestion: Optional[CongestionModel] = None,
     background_cfg: Optional[BackgroundTrafficConfig] = None,
     max_steps: int = 15_000_000,
+    rate_allocator: str = RATE_ALLOCATOR_LINK_LOCAL,
 ) -> Dict:
     """
     Adaptive multi-flow ring transfer.
@@ -1173,7 +1508,13 @@ def run_adaptive_ring_transfer(
         raise ValueError("Ring must have at least 2 workers.")
 
     background = BackgroundTrafficGenerator(topo, background_cfg) if background_cfg is not None else None
-    sim = FlowLevelSimulator(topo, dt_s=dt_s, congestion=congestion, background=background)
+    sim = FlowLevelSimulator(
+        topo,
+        dt_s=dt_s,
+        congestion=congestion,
+        background=background,
+        rate_allocator=rate_allocator,
+    )
 
     cfg = adaptive_cfg
     nominal_cap = topo.capacity_Bps  # per-link nominal capacity (bytes/s)
