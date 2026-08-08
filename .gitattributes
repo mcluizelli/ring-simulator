@@ -9,7 +9,7 @@
 
 # These paths are sealed by raw SHA-256 and must retain their exact bytes.
 /sim.py -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
-/investigations/** -text whitespace=cr-at-eol
+/investigations/** -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol
 /experiments/** -text whitespace=cr-at-eol
 
 # Frozen results are sealed by their physical CRLF bytes.
