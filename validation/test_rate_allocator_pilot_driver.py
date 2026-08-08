@@ -5,13 +5,21 @@ from __future__ import annotations
 import contextlib
 import io
 import math
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
-from experiments import run_rate_allocator_pilot as pilot
-import sim
+
+ROOT = Path(__file__).resolve().parents[1]
+EXPERIMENTS_DIR = ROOT / "experiments"
+for path in (ROOT, EXPERIMENTS_DIR):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
+
+import run_rate_allocator_pilot as pilot  # noqa: E402
+import sim  # noqa: E402
 
 
 class RateAllocatorPilotDriverTests(unittest.TestCase):
