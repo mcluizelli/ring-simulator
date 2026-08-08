@@ -1,0 +1,17 @@
+{
+  "effective_end_to_end_parallelism": 7.919947133524747,
+  "effective_simulation_parallelism": 7.690774405188407,
+  "measured_n100_pool_wall_s": 1709.280269699986,
+  "n1000_projection": {
+    "automatic_start": false,
+    "central_wall_hours_linear_same_matrix_same_workers": 4.748000749166628,
+    "semantics": "linear planning estimate from measured n=100; not a confidence interval",
+    "simulations": 268000
+  },
+  "recovered_segments": 0,
+  "schema": "rate-allocator-n100-runtime-v1",
+  "segments": 1,
+  "worker_end_to_end_wall_sum_s": 13537.409372400813,
+  "worker_simulation_wall_sum_s": 13145.68894950219,
+  "workers": 8
+}

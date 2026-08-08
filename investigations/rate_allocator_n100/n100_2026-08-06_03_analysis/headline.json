@@ -1,0 +1,71 @@
+{
+  "frozen_controller": {
+    "adaptive_pairs": 800,
+    "bit_equal": 167,
+    "event_count_changed": 523,
+    "final_k_mean_changed": 523,
+    "interpretation": "rate-model and controller decisions are coupled; frozen-threshold results are diagnostic and cannot support a calibrated method comparison",
+    "maxmin_faster": 549,
+    "maxmin_slower": 84,
+    "slower_pairs_with_event_count_changed": 70,
+    "slower_pairs_with_final_k_mean_changed": 70
+  },
+  "global_counts": {
+    "bit_equal": 9598,
+    "fixed_policy_maxmin_slower": 0,
+    "fixed_policy_pairs": 12600,
+    "maxmin_faster": 3718,
+    "maxmin_slower": 84,
+    "pairs": 13400,
+    "static_equal_bit_exact": 4800,
+    "static_proportional_bit_equal": 2164,
+    "static_proportional_maxmin_faster": 1036,
+    "static_proportional_maxmin_slower": 0
+  },
+  "inference_limits": [
+    "n=100 results are revalidation evidence; frozen result files remain unchanged",
+    "cell intervals are pointwise 95% percentile bootstrap intervals without multiplicity adjustment",
+    "the masking headline resamples 100 seed clusters and keeps all 32 cells within each seed together",
+    "the frozen controller is diagnostic until recalibrated on disjoint seeds",
+    "no n=1000 execution is authorized or started"
+  ],
+  "proportional_masking": {
+    "cell_geometric_amplification_equal_one": 9,
+    "cell_geometric_amplification_gt_one": 23,
+    "cell_geometric_amplification_lt_one": 0,
+    "headline_inference": "seed-clustered evidence that the legacy local model masked part of the proportional policy's advantage",
+    "legacy_proportional_advantage_geometric": {
+      "ci_high": 1.1384631039714577,
+      "ci_low": 1.1268290641136889,
+      "estimate": 1.1326428423240804,
+      "seed_cluster_maximum": 1.2161155394722918,
+      "seed_cluster_minimum": 1.0775555105168182
+    },
+    "matched_cells": 32,
+    "maxmin_proportional_advantage_geometric": {
+      "ci_high": 1.1720106438787021,
+      "ci_low": 1.1582616384507465,
+      "estimate": 1.1650975090370932,
+      "seed_cluster_maximum": 1.2834234656783783,
+      "seed_cluster_minimum": 1.1008933605738973
+    },
+    "multiplicity_note": "cell intervals are pointwise; no multiplicity adjustment",
+    "paired_rows": 3200,
+    "pointwise_cells_with_95pct_CI_above_one": 19,
+    "proportional_advantage_amplification": {
+      "ci_high": 1.030204658240837,
+      "ci_low": 1.027141960184179,
+      "estimate": 1.0286539282289717,
+      "seed_cluster_maximum": 1.0553466541799912,
+      "seed_cluster_minimum": 1.0152307358414585
+    },
+    "seed_clusters": 100
+  },
+  "runtime": {
+    "n1000_linear_projection_hours": 4.748000749166628,
+    "n1000_started": false,
+    "n100_pool_wall_s": 1709.280269699986,
+    "projection_is_not_a_confidence_interval": true
+  },
+  "schema": "rate-allocator-n100-analysis-headline-v1"
+}

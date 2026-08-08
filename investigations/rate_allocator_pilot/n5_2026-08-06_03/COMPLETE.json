@@ -1,0 +1,7 @@
+{
+  "completion_manifest_sha256": "dddf1c8a8cba25b4efeca409227487a7749bae18318f56c0b51007bd49513d37",
+  "plan_sha256": "51d9ca5bfdfb506cabb73ce3f9825ea19b7421b5cd471b58bd820c878d9e992f",
+  "run_manifest_sha256": "a5cdc2c2a9a6197038eccc28d2c98e94e20253fbfeb180a041b800b337b7ea6f",
+  "schema": "rate-allocator-pilot-complete-v1",
+  "status": "pilot_finished_ready_for_n100_decision"
+}

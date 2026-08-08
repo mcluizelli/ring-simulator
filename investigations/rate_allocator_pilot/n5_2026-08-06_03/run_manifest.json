@@ -1,0 +1,4919 @@
+{
+  "authorization_sha256": "93d1bd2c106ebcdd80dfdd6d939531a0ba9630c86fd7ca8ab3e01bea3254117e",
+  "automatic_next_stage": null,
+  "checkpoint_policy": "one atomic parent-written JSON per complete pair",
+  "created_local": "2026-08-06T17:26:00+0300",
+  "driver_sha256": "777018e1a408eb5274d5ee87700fc66e4396fd5d39722f625f22e48840efc431",
+  "frozen_before": {
+    "count": 63,
+    "manifest_sha256": "232da0640ac52fe52d5d171f46c6592859ade307dfd6f046b5caea203ec697a4",
+    "mismatches": 0,
+    "root_sha256": "09a1418e965b9c2d597721ff0d3b1e8db937a19ce667accfa2cf1f469664c24e",
+    "total_bytes": 21210573
+  },
+  "git": {
+    "dirty": true,
+    "head": "02c8ac9f3bedc3a621ae42b9180af2b4122a468d",
+    "status_lines": [
+      " M README.md",
+      " M analysis/analyze_v5.py",
+      " M experiments/run_congestion_parallel.py",
+      " M paper/JOSE_REVIEW_2026-07-21.md",
+      " D paper/TMP/Jose.tex",
+      " D paper/TMP/work-plan.tex",
+      " D paper/_b64.txt",
+      " M paper/build_ieee_eval_figs.py",
+      " M paper/build_split_mechanism_fig.py",
+      " M paper/fig_controller.pdf",
+      " M paper/fig_controller.png",
+      " M paper/fig_crossk.pdf",
+      " M paper/fig_crossk.png",
+      " M paper/fig_efficiency.pdf",
+      " M paper/fig_efficiency.png",
+      " M paper/fig_gap_closure.pdf",
+      " M paper/fig_gap_closure.png",
+      " M paper/fig_saturation.pdf",
+      " M paper/fig_saturation.png",
+      " M paper/fig_speedup_by_model.pdf",
+      " M paper/fig_speedup_by_model.png",
+      " M paper/fig_split_mechanism.pdf",
+      " M paper/fig_split_mechanism.png",
+      " D paper/infocom/main.tex",
+      " D results/v5.1_crosspod_n1000_2026-05-06/run.log",
+      " M sim.py",
+      "?? experiments/run_background_n1000.py",
+      "?? experiments/run_flexible_split_n1000.py",
+      "?? experiments/run_k_saturation_n1000.py",
+      "?? experiments/run_placement_policies_n1000.py",
+      "?? experiments/run_rate_allocator_pilot.py",
+      "?? experiments/run_static_af_n1000.py",
+      "?? experiments/run_static_af_p16_n1000.py",
+      "?? experiments/run_static_af_smallP_n1000.py",
+      "?? investigations/maxmin_gate_2026_08_06.py",
+      "?? investigations/maxmin_gate_2026_08_06/",
+      "?? investigations/rate_allocator_pilot/",
+      "?? investigations/rate_model_revalidation_2026_08_06/",
+      "?? paper/COMMENT_CLEANUP_PLAN_2026-08-04.md",
+      "?? paper/MAXMIN_RATE_MODEL_GATE_2026-08-06.md",
+      "?? paper/PAPER_REVISION_LOG_2026-08-06.md",
+      "?? paper/RATE_MODEL_REVALIDATION_LOG_2026-08-06.md",
+      "?? paper/RELATED_WORK_STUDY.md",
+      "?? paper/audit_paper_claims_2026_08_06.py",
+      "?? paper/build_paper_local.py",
+      "?? paper/overleaf_sync.py",
+      "?? paper/proposal/",
+      "?? paper/tmp/final_qa_20260806_01/",
+      "?? paper/tmp/final_qa_20260806_02/",
+      "?? paper/tmp/final_qa_20260806_03/",
+      "?? paper/tmp/overfull_diag_20260806/",
+      "?? paper/tmp/pdfs/",
+      "?? paper/tmp/style_figure_after.json",
+      "?? results/placement_policies_n1000/",
+      "?? results/v10.1_k_saturation_n1000/",
+      "?? results/v11.1_flexible_split_n1000/",
+      "?? results/v13.0_background_n1000/",
+      "?? results/v5.5_adaptive_n1000_placementfix/",
+      "?? results/v5.6_static_af_n1000/",
+      "?? results/v5.7_controller_n1000/",
+      "?? results/v5.8_static_af_p16_n1000/",
+      "?? results/v5.9_controller_all_n1000/",
+      "?? results/v5.9_static_af_smallP_n1000/",
+      "?? texput.log",
+      "?? validation/test_legacy_rate_model_regression.py",
+      "?? validation/test_rate_allocator_pilot_driver.py",
+      "?? validation/test_rate_allocators.py"
+    ],
+    "status_sha256": "f9ff714dcb14be4bec203aa041994a581fedf7c16eb467e416abcc8a38b53509"
+  },
+  "multiprocessing_start_method": "spawn",
+  "output": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\ring-simulator\\investigations\\rate_allocator_pilot\\n5_2026-08-06_03",
+  "pilot_use": "timing_and_coverage_only_not_a_scientific_effect_estimate",
+  "plan": {
+    "allocators": [
+      "link_local_equal_share",
+      "network_maxmin"
+    ],
+    "arms": [
+      {
+        "arm_id": "nb_p64_equal_k8",
+        "bytes_per_neighbor": 67108864,
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "static_split",
+        "k": 8,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "equal",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 64,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "arm_id": "os4_p64_equal_k1",
+        "bytes_per_neighbor": 67108864,
+        "dt_s": 5e-05,
+        "fabric": "3tier_os4",
+        "family": "static_split",
+        "k": 1,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "equal",
+        "oversub": 4.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 64,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "arm_id": "os4_p64_equal_k32",
+        "bytes_per_neighbor": 67108864,
+        "dt_s": 5e-05,
+        "fabric": "3tier_os4",
+        "family": "static_split",
+        "k": 32,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "equal",
+        "oversub": 4.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 64,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "arm_id": "os4_p64_prop_k16",
+        "bytes_per_neighbor": 67108864,
+        "dt_s": 5e-05,
+        "fabric": "3tier_os4",
+        "family": "static_split",
+        "k": 16,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "proportional",
+        "oversub": 4.0,
+        "placement": "uniform_without_replacement",
+        "policy": "proportional",
+        "redistribution_window_s": 0.001,
+        "ring_size": 64,
+        "runner": "proportional",
+        "topology_k": 16
+      },
+      {
+        "arm_id": "2tier_p64_equal_k32",
+        "bytes_per_neighbor": 67108864,
+        "dt_s": 5e-05,
+        "fabric": "2tier",
+        "family": "static_split",
+        "k": 32,
+        "link_Gbps": 100.0,
+        "n_tiers": 2,
+        "oracle_kind": "equal",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 64,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "arm_id": "congestion_onoff_p16_equal_k8",
+        "bytes_per_neighbor": 268435456,
+        "congestion": {
+          "affected_fraction": 0.3,
+          "congested_util_high": 0.95,
+          "congested_util_low": 0.5,
+          "mode": "onoff",
+          "normal_util_high": 0.05,
+          "normal_util_low": 0.0,
+          "p_off": 0.005,
+          "p_on": 0.01,
+          "target_layers": [
+            "agg_core",
+            "edge_agg"
+          ]
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "congestion",
+        "k": 8,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "congestion",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 16,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "arm_id": "congestion_iid_p16_equal_k8",
+        "bytes_per_neighbor": 268435456,
+        "congestion": {
+          "affected_fraction": 0.3,
+          "congested_util_high": 0.95,
+          "congested_util_low": 0.5,
+          "mode": "iid",
+          "normal_util_high": 0.05,
+          "normal_util_low": 0.0,
+          "target_layers": [
+            "agg_core",
+            "edge_agg"
+          ]
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "congestion",
+        "k": 8,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "congestion",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 16,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "arm_id": "congestion_hot_spot_p16_equal_k8",
+        "bytes_per_neighbor": 268435456,
+        "congestion": {
+          "affected_fraction": 0.3,
+          "congested_util_high": 0.95,
+          "congested_util_low": 0.5,
+          "mode": "hot_spot",
+          "target_layers": [
+            "agg_core",
+            "edge_agg"
+          ]
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "congestion",
+        "k": 8,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "congestion",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 16,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "arm_id": "congestion_microburst_p16_equal_k8",
+        "bytes_per_neighbor": 268435456,
+        "congestion": {
+          "affected_fraction": 0.3,
+          "burst_prob": 0.001,
+          "burst_ticks": 2,
+          "burst_util_high": 0.98,
+          "burst_util_low": 0.8,
+          "mode": "microburst",
+          "normal_util_high": 0.05,
+          "normal_util_low": 0.0,
+          "target_layers": [
+            "agg_core",
+            "edge_agg"
+          ]
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "congestion",
+        "k": 8,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "congestion",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 16,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "arm_id": "xoh_os4_p16_hotspot_prop_k8",
+        "bytes_per_neighbor": 67108864,
+        "congestion": {
+          "affected_fraction": 0.3,
+          "congested_util_high": 0.95,
+          "congested_util_low": 0.5,
+          "mode": "hot_spot",
+          "target_layers": [
+            "agg_core",
+            "edge_agg"
+          ]
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_os4",
+        "family": "congestion",
+        "k": 8,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "new_diagnostic",
+        "oversub": 4.0,
+        "placement": "uniform_without_replacement",
+        "policy": "proportional",
+        "redistribution_window_s": 0.001,
+        "ring_size": 16,
+        "runner": "proportional",
+        "topology_k": 16
+      },
+      {
+        "affected_fraction": 0.1,
+        "arm_id": "controller_af01_adaptive",
+        "bytes_per_neighbor": 268435456,
+        "controller": {
+          "cooldown_ticks": 200,
+          "k_max": 4,
+          "measurement_window_s": 0.001,
+          "threshold": 0.2
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "controller",
+        "frozen_method": "adaptive",
+        "k": 1,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "controller",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "adaptive",
+        "ring_size": 64,
+        "runner": "adaptive",
+        "topology_k": 16
+      },
+      {
+        "affected_fraction": 0.5,
+        "arm_id": "controller_af05_baseline",
+        "bytes_per_neighbor": 268435456,
+        "controller": {
+          "cooldown_ticks": 200,
+          "k_max": 4,
+          "measurement_window_s": 0.001,
+          "threshold": 0.2
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "controller",
+        "frozen_method": "baseline",
+        "k": 1,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "controller",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 64,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "affected_fraction": 0.5,
+        "arm_id": "controller_af05_static_k4",
+        "bytes_per_neighbor": 268435456,
+        "controller": {
+          "cooldown_ticks": 200,
+          "k_max": 4,
+          "measurement_window_s": 0.001,
+          "threshold": 0.2
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "controller",
+        "frozen_method": "static(k=4)",
+        "k": 4,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "controller",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "equal",
+        "ring_size": 64,
+        "runner": "simple",
+        "topology_k": 16
+      },
+      {
+        "affected_fraction": 0.5,
+        "arm_id": "controller_af05_adaptive",
+        "bytes_per_neighbor": 268435456,
+        "controller": {
+          "cooldown_ticks": 200,
+          "k_max": 4,
+          "measurement_window_s": 0.001,
+          "threshold": 0.2
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "controller",
+        "frozen_method": "adaptive",
+        "k": 1,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "controller",
+        "oversub": 1.0,
+        "placement": "uniform_without_replacement",
+        "policy": "adaptive",
+        "ring_size": 64,
+        "runner": "adaptive",
+        "topology_k": 16
+      },
+      {
+        "alpha_s": 0.0,
+        "arm_id": "background_p16_k1_rate0",
+        "arrival_rate_fps": 0,
+        "background": {
+          "locality": "mixed",
+          "mean_bytes": 52428800,
+          "p_local": 0.5,
+          "sigma_logn": 1.0,
+          "size_dist": "lognormal"
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "background",
+        "k": 1,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "background",
+        "oversub": 1.0,
+        "pipeline_window": 4,
+        "pipelined": true,
+        "placement": "uniform_without_replacement",
+        "policy": "pipelined_allreduce",
+        "ring_size": 16,
+        "runner": "allreduce",
+        "topology_k": 16,
+        "total_bytes": 268435456
+      },
+      {
+        "alpha_s": 0.0,
+        "arm_id": "background_p16_k1_rate1000",
+        "arrival_rate_fps": 1000,
+        "background": {
+          "locality": "mixed",
+          "mean_bytes": 52428800,
+          "p_local": 0.5,
+          "sigma_logn": 1.0,
+          "size_dist": "lognormal"
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "background",
+        "k": 1,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "background",
+        "oversub": 1.0,
+        "pipeline_window": 4,
+        "pipelined": true,
+        "placement": "uniform_without_replacement",
+        "policy": "pipelined_allreduce",
+        "ring_size": 16,
+        "runner": "allreduce",
+        "topology_k": 16,
+        "total_bytes": 268435456
+      },
+      {
+        "alpha_s": 0.0,
+        "arm_id": "background_p16_k4_rate0",
+        "arrival_rate_fps": 0,
+        "background": {
+          "locality": "mixed",
+          "mean_bytes": 52428800,
+          "p_local": 0.5,
+          "sigma_logn": 1.0,
+          "size_dist": "lognormal"
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "background",
+        "k": 4,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "background",
+        "oversub": 1.0,
+        "pipeline_window": 4,
+        "pipelined": true,
+        "placement": "uniform_without_replacement",
+        "policy": "pipelined_allreduce",
+        "ring_size": 16,
+        "runner": "allreduce",
+        "topology_k": 16,
+        "total_bytes": 268435456
+      },
+      {
+        "alpha_s": 0.0,
+        "arm_id": "background_p16_k4_rate1000",
+        "arrival_rate_fps": 1000,
+        "background": {
+          "locality": "mixed",
+          "mean_bytes": 52428800,
+          "p_local": 0.5,
+          "sigma_logn": 1.0,
+          "size_dist": "lognormal"
+        },
+        "dt_s": 5e-05,
+        "fabric": "3tier_nb",
+        "family": "background",
+        "k": 4,
+        "link_Gbps": 100.0,
+        "n_tiers": 3,
+        "oracle_kind": "background",
+        "oversub": 1.0,
+        "pipeline_window": 4,
+        "pipelined": true,
+        "placement": "uniform_without_replacement",
+        "policy": "pipelined_allreduce",
+        "ring_size": 16,
+        "runner": "allreduce",
+        "topology_k": 16,
+        "total_bytes": 268435456
+      }
+    ],
+    "family_pair_counts": {
+      "background": 20,
+      "congestion": 25,
+      "controller": 20,
+      "static_split": 25
+    },
+    "no_n100_execution_path": true,
+    "pair_count": 90,
+    "pairs": [
+      {
+        "arm_index": 0,
+        "config": {
+          "arm_id": "nb_p64_equal_k8",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "static_split",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "8c21bcdad614155603a3a9248278b7ff3508f172e0ba6de874f6b1b88c365764",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_nb",
+          "k": 8,
+          "seed": 0
+        },
+        "pair_id": "a01_nb_p64_equal_k8__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 0,
+        "config": {
+          "arm_id": "nb_p64_equal_k8",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "static_split",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "a385fc7d7dd8c9e58e8c150a3498a981ef25ef9a60b398d26c3d9cf0312271ff",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_nb",
+          "k": 8,
+          "seed": 17
+        },
+        "pair_id": "a01_nb_p64_equal_k8__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 0,
+        "config": {
+          "arm_id": "nb_p64_equal_k8",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "static_split",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "c65768ac4618fcc1ceef73895d5a0d2534ca28d1f6362af82ef77001d4c921c3",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_nb",
+          "k": 8,
+          "seed": 43
+        },
+        "pair_id": "a01_nb_p64_equal_k8__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 0,
+        "config": {
+          "arm_id": "nb_p64_equal_k8",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "static_split",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "4814d602a00add3b43dbcfd85a5794981c274108392196940b0a4cd7b5ee69c8",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_nb",
+          "k": 8,
+          "seed": 71
+        },
+        "pair_id": "a01_nb_p64_equal_k8__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 0,
+        "config": {
+          "arm_id": "nb_p64_equal_k8",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "static_split",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "fdd1de256cd178e28edcc016b17b8be9447a29ee2c6c585c56ebbbc70339d61b",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_nb",
+          "k": 8,
+          "seed": 99
+        },
+        "pair_id": "a01_nb_p64_equal_k8__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 1,
+        "config": {
+          "arm_id": "os4_p64_equal_k1",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "32f4b67e76011d441a2ac2e8d4df6eeedb5a84dcfabf8097e4a05789df55c6bb",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 1,
+          "seed": 0
+        },
+        "pair_id": "a02_os4_p64_equal_k1__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 1,
+        "config": {
+          "arm_id": "os4_p64_equal_k1",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "ebac849544be65b41682c0f76ac7c06a150424c4e1fdf55ea496feb01dd51b89",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 1,
+          "seed": 17
+        },
+        "pair_id": "a02_os4_p64_equal_k1__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 1,
+        "config": {
+          "arm_id": "os4_p64_equal_k1",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "226c81156ef0e53f89211c3e9a49108d59fcd62413e944e89947ae8374f99242",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 1,
+          "seed": 43
+        },
+        "pair_id": "a02_os4_p64_equal_k1__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 1,
+        "config": {
+          "arm_id": "os4_p64_equal_k1",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "10bbd268f2bdd198ceffe7f217d8fd1e0e816fe0ee51e4fc59a0fb77087f7a85",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 1,
+          "seed": 71
+        },
+        "pair_id": "a02_os4_p64_equal_k1__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 1,
+        "config": {
+          "arm_id": "os4_p64_equal_k1",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "fdf2d2586cc35e8da24562be992694d9a4201dd72ec550dec24307f4423206e0",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 1,
+          "seed": 99
+        },
+        "pair_id": "a02_os4_p64_equal_k1__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 2,
+        "config": {
+          "arm_id": "os4_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "27b6eb99269f39425637b90fb638ae3e9e10db0ddad15b98a1ed740d725ebb4e",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 32,
+          "seed": 0
+        },
+        "pair_id": "a03_os4_p64_equal_k32__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 2,
+        "config": {
+          "arm_id": "os4_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "64101d0504604a664b157b1b7f1662a629193a652100673e7aa0af390fe70d38",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 32,
+          "seed": 17
+        },
+        "pair_id": "a03_os4_p64_equal_k32__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 2,
+        "config": {
+          "arm_id": "os4_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "2543ab830ddddb2ba2071791c45c4208d1a6a50eb9e41aa200e1c106846af512",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 32,
+          "seed": 43
+        },
+        "pair_id": "a03_os4_p64_equal_k32__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 2,
+        "config": {
+          "arm_id": "os4_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "1ddc743ed1f72af00decf008f488457dd9a9a06fb0dee16b172315735b9bfcf6",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 32,
+          "seed": 71
+        },
+        "pair_id": "a03_os4_p64_equal_k32__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 2,
+        "config": {
+          "arm_id": "os4_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "equal",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "5e54e879c37db231f1ffb79af7f4d223026cdb02fd555bd23468abb0fb9d39b4",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 32,
+          "seed": 99
+        },
+        "pair_id": "a03_os4_p64_equal_k32__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 3,
+        "config": {
+          "arm_id": "os4_p64_prop_k16",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 16,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "proportional",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 64,
+          "runner": "proportional",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "79c53459eeefe4b9db2774ff7481e2bbf564281c2fddc3b260241dda71a021c4",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 16,
+          "seed": 0
+        },
+        "pair_id": "a04_os4_p64_prop_k16__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 3,
+        "config": {
+          "arm_id": "os4_p64_prop_k16",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 16,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "proportional",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 64,
+          "runner": "proportional",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "13308136b8e8677be1350c6e8fa758c14f20384e24238dba54a6ae0d0b660556",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 16,
+          "seed": 17
+        },
+        "pair_id": "a04_os4_p64_prop_k16__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 3,
+        "config": {
+          "arm_id": "os4_p64_prop_k16",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 16,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "proportional",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 64,
+          "runner": "proportional",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "d4688bf341bf3f158a6b5487bd8f806048914298a6c012f74cc2d430574ea38e",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 16,
+          "seed": 43
+        },
+        "pair_id": "a04_os4_p64_prop_k16__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 3,
+        "config": {
+          "arm_id": "os4_p64_prop_k16",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 16,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "proportional",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 64,
+          "runner": "proportional",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "6766b294fe0126e798de3fca93f37238cd4614bb8f121a943842aa4e0a3a3f42",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 16,
+          "seed": 71
+        },
+        "pair_id": "a04_os4_p64_prop_k16__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 3,
+        "config": {
+          "arm_id": "os4_p64_prop_k16",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "static_split",
+          "k": 16,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "proportional",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 64,
+          "runner": "proportional",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "9035de35c5d40331ecd0a3598d09796af6ad79edbe6b550131cf5c9a4cd0aa64",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "3tier_os4",
+          "k": 16,
+          "seed": 99
+        },
+        "pair_id": "a04_os4_p64_prop_k16__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 4,
+        "config": {
+          "arm_id": "2tier_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "2tier",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 2,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "7e1f09f29877269a4133a25ef0539ead20fcd44c74dd7227b69274b67534de8a",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "2tier",
+          "k": 32,
+          "seed": 0
+        },
+        "pair_id": "a05_2tier_p64_equal_k32__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 4,
+        "config": {
+          "arm_id": "2tier_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "2tier",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 2,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "fb9c22751bcb13024ed9ed597f168ee1ef6aca66ca0a20be47f490e1e72a5a4f",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "2tier",
+          "k": 32,
+          "seed": 17
+        },
+        "pair_id": "a05_2tier_p64_equal_k32__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 4,
+        "config": {
+          "arm_id": "2tier_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "2tier",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 2,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "32367b72676c646fc8f252a015cd1f8042176bcbc6f999181ec13ee1acfa5dc8",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "2tier",
+          "k": 32,
+          "seed": 43
+        },
+        "pair_id": "a05_2tier_p64_equal_k32__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 4,
+        "config": {
+          "arm_id": "2tier_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "2tier",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 2,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "e6b6389d045742d899cae946cb5fb7b85f23517cfc30959262e00f37d73f84bb",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "2tier",
+          "k": 32,
+          "seed": 71
+        },
+        "pair_id": "a05_2tier_p64_equal_k32__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 4,
+        "config": {
+          "arm_id": "2tier_p64_equal_k32",
+          "bytes_per_neighbor": 67108864,
+          "dt_s": 5e-05,
+          "fabric": "2tier",
+          "family": "static_split",
+          "k": 32,
+          "link_Gbps": 100.0,
+          "n_tiers": 2,
+          "oracle_kind": "equal",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "e94aca21789581e1799e52043c1b5525687e17e10c34c8805b1ee876923c06cf",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "P": 64,
+          "fabric": "2tier",
+          "k": 32,
+          "seed": 99
+        },
+        "pair_id": "a05_2tier_p64_equal_k32__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 5,
+        "config": {
+          "arm_id": "congestion_onoff_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 1000,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1000,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "1e932a3f032199b934ef1b98cba7e7e8a58b9fbc3bf9fbcf6579c443ed7569d4",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "onoff",
+          "seed": 0
+        },
+        "pair_id": "a06_congestion_onoff_p16_equal_k8__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 5,
+        "config": {
+          "arm_id": "congestion_onoff_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 1017,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1017,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "a62f770d12f19a2e168a27c9a3760aa6f8d7552657e9e7f15ecc28c8f4d3d045",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "onoff",
+          "seed": 17
+        },
+        "pair_id": "a06_congestion_onoff_p16_equal_k8__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 5,
+        "config": {
+          "arm_id": "congestion_onoff_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 1043,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1043,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "e2818079f7478128749c297acff66b059d79a3d5ea90aa4837c5a3e3ef4aefa7",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "onoff",
+          "seed": 43
+        },
+        "pair_id": "a06_congestion_onoff_p16_equal_k8__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 5,
+        "config": {
+          "arm_id": "congestion_onoff_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 1071,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1071,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "3f20341f40632ed4fbb80e442537a5c57871b85f3a4a3b1f2c55286d99f9721c",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "onoff",
+          "seed": 71
+        },
+        "pair_id": "a06_congestion_onoff_p16_equal_k8__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 5,
+        "config": {
+          "arm_id": "congestion_onoff_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 1099,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1099,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "c29b7bea282c628e2040865347f86286612d9fd7d365230604a681022edcd862",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "onoff",
+          "seed": 99
+        },
+        "pair_id": "a06_congestion_onoff_p16_equal_k8__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 6,
+        "config": {
+          "arm_id": "congestion_iid_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "iid",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1000,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1000,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "ca8c7c5889937cf95b94df153c21497569e0753023884a4bdb8a2654e509d3e7",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "iid",
+          "seed": 0
+        },
+        "pair_id": "a07_congestion_iid_p16_equal_k8__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 6,
+        "config": {
+          "arm_id": "congestion_iid_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "iid",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1017,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1017,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "3a169ac20c10ee266efc913b7554e9a442a0b83d9318b6b316f515a4958adb25",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "iid",
+          "seed": 17
+        },
+        "pair_id": "a07_congestion_iid_p16_equal_k8__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 6,
+        "config": {
+          "arm_id": "congestion_iid_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "iid",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1043,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1043,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "0f6245f87bd9062f5eb78d60657dfce208e68fbb16960c4445cdcda8e5ff7b84",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "iid",
+          "seed": 43
+        },
+        "pair_id": "a07_congestion_iid_p16_equal_k8__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 6,
+        "config": {
+          "arm_id": "congestion_iid_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "iid",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1071,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1071,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "e7a71f2f8490d12ca0f2ee9aa88e1bb555f4275dd508035dbab57f31ef59c3d6",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "iid",
+          "seed": 71
+        },
+        "pair_id": "a07_congestion_iid_p16_equal_k8__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 6,
+        "config": {
+          "arm_id": "congestion_iid_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "iid",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1099,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1099,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "e317e06fb8db4c1148d0c96a6b72f5619c1f07383e6f68ae78753b32c8dadc42",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "iid",
+          "seed": 99
+        },
+        "pair_id": "a07_congestion_iid_p16_equal_k8__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 7,
+        "config": {
+          "arm_id": "congestion_hot_spot_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1000,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1000,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "86008a21c7682e2bd93d73acb7f3bebed63e42d044654f575af5b91c171d7202",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "hot_spot",
+          "seed": 0
+        },
+        "pair_id": "a08_congestion_hot_spot_p16_equal_k8__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 7,
+        "config": {
+          "arm_id": "congestion_hot_spot_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1017,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1017,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "534095573a4c0d2b77b87f144f69b1869e53c6290acabd24c1ac4e3012dba854",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "hot_spot",
+          "seed": 17
+        },
+        "pair_id": "a08_congestion_hot_spot_p16_equal_k8__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 7,
+        "config": {
+          "arm_id": "congestion_hot_spot_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1043,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1043,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "1e28e46742142294dc963cdcc3e3d64771e1c9fdb91314bad9dc80b9d48d3950",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "hot_spot",
+          "seed": 43
+        },
+        "pair_id": "a08_congestion_hot_spot_p16_equal_k8__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 7,
+        "config": {
+          "arm_id": "congestion_hot_spot_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1071,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1071,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "307e450c842d036120f96f845dd51160a4a480cae7f1496949f3451001aa40c5",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "hot_spot",
+          "seed": 71
+        },
+        "pair_id": "a08_congestion_hot_spot_p16_equal_k8__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 7,
+        "config": {
+          "arm_id": "congestion_hot_spot_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1099,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1099,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "23554691711bc9b0484d876aec49233bc2c9a84464067f05dcf514051c6bc650",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "hot_spot",
+          "seed": 99
+        },
+        "pair_id": "a08_congestion_hot_spot_p16_equal_k8__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 8,
+        "config": {
+          "arm_id": "congestion_microburst_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "burst_prob": 0.001,
+            "burst_ticks": 2,
+            "burst_util_high": 0.98,
+            "burst_util_low": 0.8,
+            "mode": "microburst",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1000,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1000,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "c5a8227c814ab250619904643808625900fbb8d6e4700da5401c2a2f894c717c",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "microburst",
+          "seed": 0
+        },
+        "pair_id": "a09_congestion_microburst_p16_equal_k8__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 8,
+        "config": {
+          "arm_id": "congestion_microburst_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "burst_prob": 0.001,
+            "burst_ticks": 2,
+            "burst_util_high": 0.98,
+            "burst_util_low": 0.8,
+            "mode": "microburst",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1017,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1017,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "f69eb2702b369829c46ed46d5a57c47d70fafad4675345a4c1be944ed938a6d6",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "microburst",
+          "seed": 17
+        },
+        "pair_id": "a09_congestion_microburst_p16_equal_k8__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 8,
+        "config": {
+          "arm_id": "congestion_microburst_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "burst_prob": 0.001,
+            "burst_ticks": 2,
+            "burst_util_high": 0.98,
+            "burst_util_low": 0.8,
+            "mode": "microburst",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1043,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1043,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "1eac3d530159a6474323ce89872a9a46b7a530f6a677281d266a9f5bc12a57b2",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "microburst",
+          "seed": 43
+        },
+        "pair_id": "a09_congestion_microburst_p16_equal_k8__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 8,
+        "config": {
+          "arm_id": "congestion_microburst_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "burst_prob": 0.001,
+            "burst_ticks": 2,
+            "burst_util_high": 0.98,
+            "burst_util_low": 0.8,
+            "mode": "microburst",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1071,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1071,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "688b9e258eed4bf8dc057b600a62e737bd938ffb42e30cc9172edeb81da897a3",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "microburst",
+          "seed": 71
+        },
+        "pair_id": "a09_congestion_microburst_p16_equal_k8__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 8,
+        "config": {
+          "arm_id": "congestion_microburst_p16_equal_k8",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "burst_prob": 0.001,
+            "burst_ticks": 2,
+            "burst_util_high": 0.98,
+            "burst_util_low": 0.8,
+            "mode": "microburst",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "seed": 1099,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1099,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "congestion",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 16,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "84bc506dc8cda801fc2d85be1dcf8cb10e363cfc6428c82c94622150248e299b",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "k": 8,
+          "model": "microburst",
+          "seed": 99
+        },
+        "pair_id": "a09_congestion_microburst_p16_equal_k8__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 9,
+        "config": {
+          "arm_id": "xoh_os4_p16_hotspot_prop_k8",
+          "bytes_per_neighbor": 67108864,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1000,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1000,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "new_diagnostic",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 16,
+          "runner": "proportional",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "20216d3ee2c99b4532466952cd68ee3faab8eac55810021443418e2f698f5a2b",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": null,
+        "pair_id": "a10_xoh_os4_p16_hotspot_prop_k8__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 9,
+        "config": {
+          "arm_id": "xoh_os4_p16_hotspot_prop_k8",
+          "bytes_per_neighbor": 67108864,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1017,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1017,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "new_diagnostic",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 16,
+          "runner": "proportional",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "4b2ec5b0704c6f63b9505212b2e92c8f036f2d9cba6527bc615bb05e4e64d74a",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": null,
+        "pair_id": "a10_xoh_os4_p16_hotspot_prop_k8__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 9,
+        "config": {
+          "arm_id": "xoh_os4_p16_hotspot_prop_k8",
+          "bytes_per_neighbor": 67108864,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1043,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1043,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "new_diagnostic",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 16,
+          "runner": "proportional",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "5f6523913132c573160fe72e29b29ce1fe87f771ff9f165e5abaf88cfdfd1561",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": null,
+        "pair_id": "a10_xoh_os4_p16_hotspot_prop_k8__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 9,
+        "config": {
+          "arm_id": "xoh_os4_p16_hotspot_prop_k8",
+          "bytes_per_neighbor": 67108864,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1071,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1071,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "new_diagnostic",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 16,
+          "runner": "proportional",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "d55d9d302e0ea4abb9bd12c81a5bbecb38389b861164e8cc58fd2fbedc34cee9",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": null,
+        "pair_id": "a10_xoh_os4_p16_hotspot_prop_k8__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 9,
+        "config": {
+          "arm_id": "xoh_os4_p16_hotspot_prop_k8",
+          "bytes_per_neighbor": 67108864,
+          "congestion": {
+            "affected_fraction": 0.3,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "hot_spot",
+            "seed": 1099,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "congestion_seed": 1099,
+          "dt_s": 5e-05,
+          "fabric": "3tier_os4",
+          "family": "congestion",
+          "k": 8,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "new_diagnostic",
+          "oversub": 4.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "proportional",
+          "redistribution_window_s": 0.001,
+          "ring_size": 16,
+          "runner": "proportional",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1
+        },
+        "config_sha256": "72d536c995bdefd06f13ad0b8b9043be7ae8578ebbffa6124d71422fbc357a51",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": null,
+        "pair_id": "a10_xoh_os4_p16_hotspot_prop_k8__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 10,
+        "config": {
+          "affected_fraction": 0.1,
+          "arm_id": "controller_af01_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.1,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 52066,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 51966
+        },
+        "config_sha256": "8549da16b608be72300918151bc858be4d6c0e1a1414605407ff9723f50896ff",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.1,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 1,
+          "seed": 51966
+        },
+        "pair_id": "a11_controller_af01_adaptive__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 10,
+        "config": {
+          "affected_fraction": 0.1,
+          "arm_id": "controller_af01_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.1,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 170052083,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 170051983
+        },
+        "config_sha256": "86bf530d1e755513177e778e2e28dbd1e428add7e6370794487da294a30b28f2",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.1,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 18,
+          "seed": 170051983
+        },
+        "pair_id": "a11_controller_af01_adaptive__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 10,
+        "config": {
+          "affected_fraction": 0.1,
+          "arm_id": "controller_af01_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.1,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 430052109,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 430052009
+        },
+        "config_sha256": "640096def19afebab2089258660268d88886a236bd19a818e4267f8c5c6c2640",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.1,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 44,
+          "seed": 430052009
+        },
+        "pair_id": "a11_controller_af01_adaptive__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 10,
+        "config": {
+          "affected_fraction": 0.1,
+          "arm_id": "controller_af01_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.1,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 710052137,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 710052037
+        },
+        "config_sha256": "c69a43c3e6be78f6c8f9c6d5bf7d6f6cfe4e3a492626c189613050bd49764eac",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.1,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 72,
+          "seed": 710052037
+        },
+        "pair_id": "a11_controller_af01_adaptive__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 10,
+        "config": {
+          "affected_fraction": 0.1,
+          "arm_id": "controller_af01_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.1,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 990052165,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 990052065
+        },
+        "config_sha256": "4dabed10efc4a5b015fd6f21a3de225bef335dad6a33aacaec520b5eae36da96",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.1,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 100,
+          "seed": 990052065
+        },
+        "pair_id": "a11_controller_af01_adaptive__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 11,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_baseline",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 52466,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "baseline",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 51966
+        },
+        "config_sha256": "564ee8af1ba08019d18ab6f15dc193f257e9a8309d6dc141ba670fa4bff4b91f",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "baseline",
+          "ring_size": 64,
+          "run": 1,
+          "seed": 51966
+        },
+        "pair_id": "a12_controller_af05_baseline__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 11,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_baseline",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 170052483,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "baseline",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 170051983
+        },
+        "config_sha256": "9480a309f504ba7b601106e9384148fb4bb900a4336bf1447e17b8b6eeaad2d6",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "baseline",
+          "ring_size": 64,
+          "run": 18,
+          "seed": 170051983
+        },
+        "pair_id": "a12_controller_af05_baseline__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 11,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_baseline",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 430052509,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "baseline",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 430052009
+        },
+        "config_sha256": "91c98d9fcb91eb03793030f33beaa60a9eb0da3746f926edfc676cb18501820b",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "baseline",
+          "ring_size": 64,
+          "run": 44,
+          "seed": 430052009
+        },
+        "pair_id": "a12_controller_af05_baseline__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 11,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_baseline",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 710052537,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "baseline",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 710052037
+        },
+        "config_sha256": "f7e060492a41cec1cbf29f0879f604d133df0c110a21d6c61f1c95864bf30222",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "baseline",
+          "ring_size": 64,
+          "run": 72,
+          "seed": 710052037
+        },
+        "pair_id": "a12_controller_af05_baseline__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 11,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_baseline",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 990052565,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "baseline",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 990052065
+        },
+        "config_sha256": "76c11c7eae1a11af3c3ab0d49b5df3c4acab12f259e79b70b9feeeb2365c0018",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "baseline",
+          "ring_size": 64,
+          "run": 100,
+          "seed": 990052065
+        },
+        "pair_id": "a12_controller_af05_baseline__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 12,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_static_k4",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 52466,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "static(k=4)",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 51966
+        },
+        "config_sha256": "021f27b3461d3b685883fda21d2962cd325ad50fc8a83a3f51012b7c7cf45495",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "static(k=4)",
+          "ring_size": 64,
+          "run": 1,
+          "seed": 51966
+        },
+        "pair_id": "a13_controller_af05_static_k4__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 12,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_static_k4",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 170052483,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "static(k=4)",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 170051983
+        },
+        "config_sha256": "ea81594db23f021880d9331eb4bf40e3e75b6d78632ea4582a580b0cf5f680fa",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "static(k=4)",
+          "ring_size": 64,
+          "run": 18,
+          "seed": 170051983
+        },
+        "pair_id": "a13_controller_af05_static_k4__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 12,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_static_k4",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 430052509,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "static(k=4)",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 430052009
+        },
+        "config_sha256": "d4ab84c6d06a0cd5fc753798b5517cd8e0f8a17d5676df1239a83220f41c3cb0",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "static(k=4)",
+          "ring_size": 64,
+          "run": 44,
+          "seed": 430052009
+        },
+        "pair_id": "a13_controller_af05_static_k4__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 12,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_static_k4",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 710052537,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "static(k=4)",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 710052037
+        },
+        "config_sha256": "6ecf4d12c3c37de0d560eb1361de805dfe1df9dbc49e702c3df8ccb13d12f4d3",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "static(k=4)",
+          "ring_size": 64,
+          "run": 72,
+          "seed": 710052037
+        },
+        "pair_id": "a13_controller_af05_static_k4__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 12,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_static_k4",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 990052565,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "static(k=4)",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "equal",
+          "ring_size": 64,
+          "runner": "simple",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 990052065
+        },
+        "config_sha256": "07d9e3fdff11fa4929913083707fb933c4cc1a9d2f7cf7e4d638389ac6ea32d7",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "static(k=4)",
+          "ring_size": 64,
+          "run": 100,
+          "seed": 990052065
+        },
+        "pair_id": "a13_controller_af05_static_k4__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 13,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 52466,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 51966
+        },
+        "config_sha256": "2f4e95cc0bfefaf022a367de10a717466d79356cd07761b6b7039a9d04c765a7",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 1,
+          "seed": 51966
+        },
+        "pair_id": "a14_controller_af05_adaptive__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 13,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 170052483,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 170051983
+        },
+        "config_sha256": "80b69c94de9d2c67834ead4b27cec402f75a76e59cd24c81833a3b38266b3b03",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 18,
+          "seed": 170051983
+        },
+        "pair_id": "a14_controller_af05_adaptive__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 13,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 430052509,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 430052009
+        },
+        "config_sha256": "a47b2f5e496286c4b1869d011c497e59382e875f1cc559ee32796f4a2b69e908",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 44,
+          "seed": 430052009
+        },
+        "pair_id": "a14_controller_af05_adaptive__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 13,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 710052537,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 710052037
+        },
+        "config_sha256": "452600868e454d4b9717e484b21c5bd7428676a48d6fb63df4481744d0f8ef18",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 72,
+          "seed": 710052037
+        },
+        "pair_id": "a14_controller_af05_adaptive__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 13,
+        "config": {
+          "affected_fraction": 0.5,
+          "arm_id": "controller_af05_adaptive",
+          "bytes_per_neighbor": 268435456,
+          "congestion": {
+            "affected_fraction": 0.5,
+            "congested_util_high": 0.95,
+            "congested_util_low": 0.5,
+            "mode": "onoff",
+            "normal_util_high": 0.05,
+            "normal_util_low": 0.0,
+            "p_off": 0.005,
+            "p_on": 0.01,
+            "seed": 990052565,
+            "target_layers": [
+              "agg_core",
+              "edge_agg"
+            ]
+          },
+          "controller": {
+            "cooldown_ticks": 200,
+            "k_max": 4,
+            "measurement_window_s": 0.001,
+            "threshold": 0.2
+          },
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "controller",
+          "frozen_method": "adaptive",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "controller",
+          "oversub": 1.0,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "adaptive",
+          "ring_size": 64,
+          "runner": "adaptive",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 990052065
+        },
+        "config_sha256": "4ce603b633c660d6d994a2f95b4deeba6fb8529bfc3ec1294944e12b20fc2b10",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "affected_fraction": 0.5,
+          "method": "adaptive",
+          "ring_size": 64,
+          "run": 100,
+          "seed": 990052065
+        },
+        "pair_id": "a14_controller_af05_adaptive__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 14,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "7f6924dd920ec31327ba21ae5afdd4bf3c4b91c3fb25fbefb996e5b2e3268924",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 1,
+          "run": 0
+        },
+        "pair_id": "a15_background_p16_k1_rate0__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 14,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "2a4bf0ccb7630b15423b7b9ac302a6483969da24af39045f1c8e1b2e70769575",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 1,
+          "run": 17
+        },
+        "pair_id": "a15_background_p16_k1_rate0__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 14,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "60b57a3f735918822c5ad6a300b8872bf17681ddd702ecee5c770e2be6baac9c",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 1,
+          "run": 43
+        },
+        "pair_id": "a15_background_p16_k1_rate0__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 14,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "2154282e66ea2344f544c1d28c8a01bd6277e3696bb9eda4cffae97d41e10521",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 1,
+          "run": 71
+        },
+        "pair_id": "a15_background_p16_k1_rate0__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 14,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "6b282159c0483dd60329afcc01dbe9aa8ebe9b148ff77404ae7dd06caa18b207",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 1,
+          "run": 99
+        },
+        "pair_id": "a15_background_p16_k1_rate0__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 15,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 49879,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "660337de6ffa5841fffe1a78641938f14f807c413a9a9ec26717dfb24972f516",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 1,
+          "run": 0
+        },
+        "pair_id": "a16_background_p16_k1_rate1000__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 15,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 170049896,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "838a73e185cade5b3daa00b4b5179804d2376a58bb6eced65bcb6e176c0c56fc",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 1,
+          "run": 17
+        },
+        "pair_id": "a16_background_p16_k1_rate1000__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 15,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 430049922,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "9a4a59c0dd99db7a753ded7031a2b0332a74b3909bdee4fbd477b83c24b51598",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 1,
+          "run": 43
+        },
+        "pair_id": "a16_background_p16_k1_rate1000__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 15,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 710049950,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "9f04bf42717198936780030296a04c281c9b9d0abdf8a0be0a9e11dd03c02d30",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 1,
+          "run": 71
+        },
+        "pair_id": "a16_background_p16_k1_rate1000__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 15,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k1_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 990049978,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 1,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "b89f45ec09f45e448b3a4a3288ff925a4a4cc2cee2e893664bdceb56b767a439",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 1,
+          "run": 99
+        },
+        "pair_id": "a16_background_p16_k1_rate1000__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 16,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "8e899a4cb03967098a27c1439a45b3ac30bf8d4ecf25376f9dbc683a70b811d9",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 4,
+          "run": 0
+        },
+        "pair_id": "a17_background_p16_k4_rate0__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 16,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "d5eff83a40fb3179b79f615a2417b02c1d9075b5a73f7f331e0ead87fee2b6d8",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 4,
+          "run": 17
+        },
+        "pair_id": "a17_background_p16_k4_rate0__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 16,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "395c3d1e126965c6b5ff4ff61e636979fcab73d8bd7840be46b1911da084f350",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 4,
+          "run": 43
+        },
+        "pair_id": "a17_background_p16_k4_rate0__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 16,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "cb065198a8dd4d441415c8ceb2040d9b1e0781b7aeb0a7df08fe7c8a1527b775",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 4,
+          "run": 71
+        },
+        "pair_id": "a17_background_p16_k4_rate0__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 16,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate0",
+          "arrival_rate_fps": 0,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": null,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "091e9a7620fbba4aceb8e00e8ffb26785f9c3e1cb0952d762fa4d80cc78d3c86",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 0,
+          "k": 4,
+          "run": 99
+        },
+        "pair_id": "a17_background_p16_k4_rate0__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      },
+      {
+        "arm_index": 17,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 49879,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9000,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 0,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "31f68cee6ab252f05f88308f8b6ce8a3792b845f67c3c3f66a3f3bfd488b9027",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 4,
+          "run": 0
+        },
+        "pair_id": "a18_background_p16_k4_rate1000__s000",
+        "sample_id": 0,
+        "sample_index": 0
+      },
+      {
+        "arm_index": 17,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 170049896,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9017,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 17,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "62008df1af34e4b4737a3b34d4db4c94a57ef5ea3b4d15f976f8a13fed1f035e",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 4,
+          "run": 17
+        },
+        "pair_id": "a18_background_p16_k4_rate1000__s017",
+        "sample_id": 17,
+        "sample_index": 1
+      },
+      {
+        "arm_index": 17,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 430049922,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9043,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 43,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "96210533d1e402b6d4aa2b770f62a61b3b28176c0aa1eb142b1ae7d1a305819e",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 4,
+          "run": 43
+        },
+        "pair_id": "a18_background_p16_k4_rate1000__s043",
+        "sample_id": 43,
+        "sample_index": 2
+      },
+      {
+        "arm_index": 17,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 710049950,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9071,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 71,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "971a6b756beca8d39e143d2dfe3ef3e018c6e81ee464ff9df48ffd9d8148d7e0",
+        "execution_order": [
+          "link_local_equal_share",
+          "network_maxmin"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 4,
+          "run": 71
+        },
+        "pair_id": "a18_background_p16_k4_rate1000__s071",
+        "sample_id": 71,
+        "sample_index": 3
+      },
+      {
+        "arm_index": 17,
+        "config": {
+          "alpha_s": 0.0,
+          "arm_id": "background_p16_k4_rate1000",
+          "arrival_rate_fps": 1000,
+          "background": {
+            "locality": "mixed",
+            "mean_bytes": 52428800,
+            "p_local": 0.5,
+            "sigma_logn": 1.0,
+            "size_dist": "lognormal"
+          },
+          "background_seed": 990049978,
+          "dt_s": 5e-05,
+          "fabric": "3tier_nb",
+          "family": "background",
+          "k": 4,
+          "link_Gbps": 100.0,
+          "n_tiers": 3,
+          "oracle_kind": "background",
+          "oversub": 1.0,
+          "pipeline_window": 4,
+          "pipelined": true,
+          "placement": "uniform_without_replacement",
+          "placement_seed": 9099,
+          "policy": "pipelined_allreduce",
+          "ring_size": 16,
+          "runner": "allreduce",
+          "sample_id": 99,
+          "topology_k": 16,
+          "topology_seed": 1,
+          "total_bytes": 268435456
+        },
+        "config_sha256": "0fbfbcca16f54ed17d9bca5f40581f199d218b7e07cf881286e1c41e40f81721",
+        "execution_order": [
+          "network_maxmin",
+          "link_local_equal_share"
+        ],
+        "oracle_key": {
+          "arrival_rate_fps": 1000,
+          "k": 4,
+          "run": 99
+        },
+        "pair_id": "a18_background_p16_k4_rate1000__s099",
+        "sample_id": 99,
+        "sample_index": 4
+      }
+    ],
+    "plan_sha256": "51d9ca5bfdfb506cabb73ce3f9825ea19b7421b5cd471b58bd820c878d9e992f",
+    "sample_ids": [
+      0,
+      17,
+      43,
+      71,
+      99
+    ],
+    "schema": "rate-allocator-pilot-plan-v1",
+    "simulation_count": 180
+  },
+  "plan_sha256": "51d9ca5bfdfb506cabb73ce3f9825ea19b7421b5cd471b58bd820c878d9e992f",
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "results_tree_before": {
+    "file_count": 99,
+    "root_sha256": "d63aba765ee1aecb338e5fa3cf3e083fc2999bfe1a16cd7c695a051821b3a129",
+    "total_bytes": 24673134
+  },
+  "schema": "rate-allocator-pilot-run-v1",
+  "sim_sha256": "40edbacc28e61bb25769278382506c32611cf7fd9e14777480b6fd3d664fab69",
+  "workers": 8
+}

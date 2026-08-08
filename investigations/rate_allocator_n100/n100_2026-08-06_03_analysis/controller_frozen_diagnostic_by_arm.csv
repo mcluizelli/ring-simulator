@@ -1,0 +1,9 @@
+arm_id,n_pairs,ratio_mean,ratio_mean_ci_low,ratio_mean_ci_high,maxmin_faster_count,bit_equal_count,maxmin_slower_count,adaptive_event_count_changed,final_k_mean_changed,interpretation
+controller_p16_af00_adaptive,100,0.9997522343832146,0.9993733212254458,1.0,2,98,0,0,0,diagnostic_only_recalibrate_on_disjoint_seeds
+controller_p16_af01_adaptive,100,0.983776552437988,0.9777679179945648,0.9897610565053225,66,10,24,61,61,diagnostic_only_recalibrate_on_disjoint_seeds
+controller_p16_af03_adaptive,100,0.9620633264762057,0.9545913376723428,0.969175582779235,87,3,10,89,89,diagnostic_only_recalibrate_on_disjoint_seeds
+controller_p16_af05_adaptive,100,0.9637428929363057,0.9577649034198052,0.9695045036616324,90,3,7,75,75,diagnostic_only_recalibrate_on_disjoint_seeds
+controller_p64_af00_adaptive,100,0.9928409514596978,0.9904037225212814,0.9949066921842364,55,41,4,2,2,diagnostic_only_recalibrate_on_disjoint_seeds
+controller_p64_af01_adaptive,100,0.9815214023815879,0.9736818588829388,0.9892277969523594,64,8,28,99,99,diagnostic_only_recalibrate_on_disjoint_seeds
+controller_p64_af03_adaptive,100,0.9636834998597607,0.9560564693796281,0.9709574747499392,90,2,8,98,98,diagnostic_only_recalibrate_on_disjoint_seeds
+controller_p64_af05_adaptive,100,0.9522114772709718,0.945510500333229,0.9587679625417218,95,2,3,99,99,diagnostic_only_recalibrate_on_disjoint_seeds

@@ -1,0 +1,44 @@
+{
+  "analysis_source_sha256": "40ae46cddbc346761ebb61ddf26696a8ded7dc81a56e2fee92757e214805ae37",
+  "bootstrap": {
+    "arm_unit": "paired sample within one arm",
+    "base_seed": 20260806,
+    "headline_unit": "sample-ID cluster containing all 32 matched cells",
+    "interval": "two-sided 95% percentile",
+    "repetitions": 20000
+  },
+  "n1000_started": false,
+  "outputs": {
+    "ANALYSIS_SUMMARY.md": {
+      "bytes": 1826,
+      "sha256": "1bf2fe31d848319cb64aa7711266c5bd18b356c5979c9553d4c73f7bdb2239c9"
+    },
+    "allocator_effect_by_arm.csv": {
+      "bytes": 26677,
+      "sha256": "6b6d86447d2ead7d33b7a43a221b7d3cc52196ffe750609452850e4a1d5bf9db"
+    },
+    "controller_frozen_diagnostic_by_arm.csv": {
+      "bytes": 1359,
+      "sha256": "51794ed2f4816fb0c5838e624d2b1d69a1dfa5109df10e3d09012f5b8d9e737c"
+    },
+    "family_seed_cluster_summary.csv": {
+      "bytes": 798,
+      "sha256": "c729c771513ab7c7651a8e05e0473a3e929bb3ff8f597d2d4357cdf4cd904a88"
+    },
+    "headline.json": {
+      "bytes": 2839,
+      "sha256": "18a500516a1c15f68117a386cade84d9f2a0373cad31014c088b6a170e8ee39b"
+    },
+    "proportional_masking_by_cell.csv": {
+      "bytes": 8002,
+      "sha256": "098a0bf2d3e906ef4e10f9b620c7961e488c3884da6b14b40caeae8c69074306"
+    }
+  },
+  "paper_or_frozen_files_modified": false,
+  "schema": "rate-allocator-n100-analysis-manifest-v1",
+  "sealed_complete_sha256": "c4caaf8bb203eff3b815236c3bc848d8d483b521571c3ab71a47a32f135eadfa",
+  "sealed_completion_manifest_sha256": "f1aa85a896e85cd918532dd8b838c31bf49749780f53a3530a28a574b3b4f5a8",
+  "sealed_pairs_sha256": "1f414755c340daa84b9b0df83c60e36991129111bca2bce1dc4165e5f6541764",
+  "sealed_results_long_sha256": "70c75d05ff4e593266f809e8daf6f6ece058c8ff925b309200fe01669c74c8dd",
+  "sealed_run": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\ring-simulator\\investigations\\rate_allocator_n100\\n100_2026-08-06_03"
+}

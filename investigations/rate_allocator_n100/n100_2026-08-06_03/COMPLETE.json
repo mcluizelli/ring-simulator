@@ -1,0 +1,7 @@
+{
+  "completion_manifest_sha256": "f1aa85a896e85cd918532dd8b838c31bf49749780f53a3530a28a574b3b4f5a8",
+  "plan_sha256": "47099eedb41d1574cc49a6e08a2f7bb20b6c14077531b32b80222be9519291ac",
+  "run_manifest_sha256": "0dc37aa87dbc77e38de75463d7b6bf6e14250ee7d3a794ba941ba1fd234a4371",
+  "schema": "rate-allocator-n100-complete-v1",
+  "status": "n100_revalidation_complete_ready_for_analysis"
+}

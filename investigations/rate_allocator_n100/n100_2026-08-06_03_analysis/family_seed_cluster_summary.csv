@@ -1,0 +1,6 @@
+family,arm_count,pair_count,seed_cluster_count,equal_arm_weight_geometric_ratio,cluster_bootstrap_ci_low,cluster_bootstrap_ci_high,maxmin_faster_count,bit_equal_count,maxmin_slower_count,interpretation
+background,8,800,100,0.9999743884715667,0.999933183888958,1.0,4,796,0,seed_clustered_equal_arm_weight
+congestion,16,1600,100,0.9849326098667558,0.9836377551574095,0.9861433480748818,991,609,0,seed_clustered_equal_arm_weight
+controller,24,2400,100,0.9778275800016771,0.9765672189279716,0.9790595994747209,1260,1056,84,diagnostic_only_frozen_controller
+placement,6,600,100,0.9746899667314787,0.9731111823868074,0.9762747262970193,427,173,0,seed_clustered_equal_arm_weight
+static_split,80,8000,100,0.9887631773568432,0.9881530039308586,0.9893426981216774,1036,6964,0,seed_clustered_equal_arm_weight
