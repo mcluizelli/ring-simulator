@@ -95,7 +95,7 @@ EXPECTED_SENTINEL_EXCLUDED_BOOTSTRAP_SHA256 = (
 # Rebind exactly once after the driver and specification are final.  Production
 # and self-test both fail closed while either marker remains unresolved.
 EXPECTED_DRIVER_SHA256 = (
-    "ebaacb5a71bce08dcab543f4f0bd2a6ec3c8de428bef617d9e14e720118f6d6a"
+    "b427b264e22f91bced2c3243d540f5a4548cb17c966b952080e2736bb89ebef7"
 )
 EXPECTED_SPEC_SHA256 = (
     "b3a74dcc5808d054f8025613b7a47f24867a33dbc894710aeced463b7788b41b"

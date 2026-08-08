@@ -987,6 +987,18 @@ def _verify_directory_inventory(output: Path, *, require_complete: bool) -> None
         raise RuntimeError("complete campaign has no timing segments")
 
 
+def _verify_preflight_root_inventory(output: Path) -> None:
+    names = {path.name for path in output.iterdir()}
+    if names != PARTIAL_ROOT_NAMES:
+        raise RuntimeError(
+            f"preflight root inventory is not exact: {sorted(names)}"
+        )
+    staging = [path for path in output.rglob("*") if path.is_dir() and path.name == ".staging"]
+    if staging:
+        raise RuntimeError(f"preflight boundary retains staging directories: {staging}")
+    _verify_directory_inventory(output, require_complete=False)
+
+
 def _preflight_gate(
     plan: Mapping[str, Any], checkpoints: Mapping[str, Mapping[str, Any]]
 ) -> Dict[str, Any]:
@@ -1065,6 +1077,21 @@ def _write_or_verify_preflight(
         for pair_id in set(checkpoints) - set(plan["preflight_pair_ids"])
     ):
         raise RuntimeError("preflight/main checkpoint write ordering changed")
+    return value
+
+
+def _seal_preflight_boundary(
+    output: Path,
+    plan: Mapping[str, Any],
+    checkpoints: Mapping[str, Mapping[str, Any]],
+    manifest: Mapping[str, Any],
+    *,
+    require_exact_root: bool,
+) -> Dict[str, Any]:
+    value = _write_or_verify_preflight(output, plan, checkpoints, manifest)
+    _cleanup_staging(output)
+    if require_exact_root:
+        _verify_preflight_root_inventory(output)
     return value
 
 
@@ -1880,7 +1907,19 @@ def execute_or_resume(
         )
         checkpoints = _existing_checkpoints(output, plan)
         segments = _load_timing(output, checkpoints)
-        _write_or_verify_preflight(output, plan, checkpoints, manifest)
+        pending = [
+            pair
+            for pair in plan["pairs"]
+            if pair["pair_id"] not in checkpoints
+            and pair["pair_id"] not in preflight_ids
+        ]
+        _seal_preflight_boundary(
+            output,
+            plan,
+            checkpoints,
+            manifest,
+            require_exact_root=preflight_only or bool(pending),
+        )
         if preflight_only:
             if set(checkpoints) - preflight_ids:
                 raise RuntimeError("--preflight-only is invalid after main-phase work exists")
@@ -1911,7 +1950,6 @@ def execute_or_resume(
                 ),
                 "eta_role": "operational_projection_not_scientific_result",
             }
-        pending = [pair for pair in plan["pairs"] if pair["pair_id"] not in checkpoints]
         _run_phase(
             pending,
             phase="remaining_28736",

@@ -196,6 +196,63 @@ class CorrectedProportionalN1000ExtensionTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             driver._preflight_gate(self.plan, dict(list(pairs.items())[:-1]))
 
+    def test_actual_preflight_seal_leaves_no_staging_and_rejects_residue(self) -> None:
+        with tempfile.TemporaryDirectory() as raw:
+            output = Path(raw)
+            checkpoints_dir = output / "checkpoints"
+            timing_dir = output / "timing_segments"
+            checkpoints_dir.mkdir()
+            timing_dir.mkdir()
+            (output / ".run.lock").write_bytes(b"0")
+            (output / "run_manifest.json").write_text("{}\n", encoding="utf-8")
+            pair_ids = list(self.plan["preflight_pair_ids"])
+            checkpoints = {}
+            for pair_id in pair_ids:
+                (checkpoints_dir / f"{pair_id}.json").write_text(
+                    "{}\n", encoding="utf-8"
+                )
+                checkpoints[pair_id] = {"pair_spec": self.by_id[pair_id]}
+            (timing_dir / "segment_001.json").write_text(
+                json.dumps({"pair_ids": pair_ids}), encoding="utf-8"
+            )
+            manifest = {
+                "driver_sha256": "d" * 64,
+                "immutable_before": {
+                    "sources": {},
+                    "n100_reference_sha256": {},
+                },
+            }
+            driver._seal_preflight_boundary(
+                output,
+                self.plan,
+                checkpoints,
+                manifest,
+                require_exact_root=True,
+            )
+            self.assertTrue((output / "preflight_complete.json").is_file())
+            self.assertFalse(
+                any(
+                    path.is_dir() and path.name == ".staging"
+                    for path in output.rglob("*")
+                )
+            )
+            self.assertEqual(
+                {path.name for path in output.iterdir()},
+                driver.PARTIAL_ROOT_NAMES,
+            )
+
+            residue = checkpoints_dir / ".staging"
+            residue.mkdir()
+            (residue / "orphan.tmp").write_bytes(b"x")
+            with self.assertRaises(RuntimeError):
+                driver._seal_preflight_boundary(
+                    output,
+                    self.plan,
+                    checkpoints,
+                    manifest,
+                    require_exact_root=True,
+                )
+
     def test_bootstrap_index_contracts(self) -> None:
         for count, key in (
             (900, "extension_primary"),
