@@ -26,7 +26,9 @@ import matplotlib.pyplot as plt
 
 import analyze_efficiency as ae
 
-DEFAULT_TAG = "v5.1_crosspod_n1000_2026-05-06"
+# v5.1 confined the ring to one pod (tracker A.5), under-reporting every cell.
+# v5.3 is the placement-fixed run with the same static/adaptive/allreduce layout.
+DEFAULT_TAG = "v5.3_placementfix_n100"
 
 # ─── Bootstrap CI helpers ───────────────────────────────────────────
 

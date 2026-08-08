@@ -24,33 +24,42 @@ _RING_ROOT = _BootPath(__file__).resolve().parents[1]
 if str(_RING_ROOT) not in _sys.path:
     _sys.path.insert(0, str(_RING_ROOT))
 # ------------------------------------------------------------------------------------
+import random
+
 from experiment_congestion_models import (
     AFFECTED_FRACTION, BYTES_PER_NEIGHBOR, DT_S, LINK_GBPS, MODELS, OUT_DIR,
-    RING_SIZE, SWEEP_K, TOPO_K, analyze, make_congestion, plot_speedup,
-    print_summary, save_csv,
+    PLACEMENT, RING_SIZE, SEED_BASE, SWEEP_K, TOPO_K, analyze, make_congestion,
+    plot_speedup, print_summary, save_csv,
 )
 from sim import FatTree, build_worker_ring, run_simple_ring_transfer
 
-# Per-worker globals (built once per process, reused across that worker's tasks —
-# exactly as the serial script reuses one topology for every run).
+# Per-worker global (built once per process; the topology is deterministic).
+# The RING is NOT a global: placement varies per seed, exactly as in the serial
+# script, so it has to be rebuilt inside each (model, seed) unit.
 _TOPO = None
-_RING = None
 
 
 def _init() -> None:
-    global _TOPO, _RING
+    global _TOPO
     _TOPO = FatTree(k=TOPO_K, link_capacity_Gbps=LINK_GBPS)
-    _RING = build_worker_ring(_TOPO.hosts, worker_count=RING_SIZE, start_index=0)
+
+
+def _make_ring(seed: int):
+    """Placement per seed — mirrors experiment_congestion_models.run_sweep."""
+    if PLACEMENT == "contiguous":                       # old, buggy v6.1 behaviour
+        return build_worker_ring(_TOPO.hosts, worker_count=RING_SIZE, start_index=0)
+    return random.Random(SEED_BASE + seed).sample(_TOPO.hosts, RING_SIZE)
 
 
 def _work(task):
     model, seed = task
     cong_seed = 1000 + seed   # same seed convention as the serial script
+    ring = _make_ring(seed)   # same placement for every k -> valid per-seed pairing
     out = []
     for k in SWEEP_K:
         cong = make_congestion(model, cong_seed)
         t = run_simple_ring_transfer(
-            topo=_TOPO, ring=_RING, bytes_per_neighbor=BYTES_PER_NEIGHBOR,
+            topo=_TOPO, ring=ring, bytes_per_neighbor=BYTES_PER_NEIGHBOR,
             flows_per_neighbor=k, dt_s=DT_S, congestion=cong,
         )
         out.append({"model": model, "seed": seed, "k": k, "completion_time_s": t})
