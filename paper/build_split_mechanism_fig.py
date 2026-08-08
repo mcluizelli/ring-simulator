@@ -1,22 +1,39 @@
 """
-Single-column (IEEE ~3.45in) mechanism figure for the multi-flow split.
+Single-column (IEEE ~3.45in) mechanism figure for the multi-flow split: fig_split_mechanism.
 
-Paper-ready companion to reports/multiflow_split_mechanism.png (the wide,
-report-style version). Two stacked panels make the SPLIT DECISION visible as
-bar length:
+Design settled 2026-08-05, third redesign, chosen BY READER TEST rather than by designer
+preference. Record of how we got here, so it is not relitigated:
 
-  (top)  Equal split       B_i = B/k              -> the 25-Gbps flow straggles
-  (bottom) Proportional    B_i = B * rate_i/Sum   -> all flows finish together
+  v1  bars, length = completion time, in-bar label = byte share. The actual reader asked
+      "what is being compared between the rows, and what is the x axis?" - the two
+      questions this design cannot answer structurally.
+  v2  cumulative bytes-vs-time lines (slope = rate, height = share, stop = finish; all
+      three quantities geometric). Rejected: the reader said plainly he did not
+      understand it. Optimising for "everything geometric" is a designer's virtue, not
+      a reader's.
+  v2b capacity-utilization lanes (height = rate, area = bytes, hatched idle). Rejected on
+      review: the straggler - the story's protagonist - is the THINNEST lane (10% of the
+      stack), and the "idle capacity" framing conflates the k=1 motivation ("paths sit
+      idle", abstract) with the split question, which is about k open flows.
+  v3  THIS: paired bars, one row per sub-flow, the two policies compared inside each row.
+      The reader reinvented this structure unprompted ("for each one, compare the split
+      and the proportional"). Row = one sub-flow labelled by its path's rate; blue =
+      equal split, green = proportional (named directly on row 1, no legend); bar length
+      = time to send the share it was given; the % label IS the share. The straggler is
+      the longest bar on the page, and the honest price - fast flows work LONGER under
+      proportional - is visible in every upper row.
 
-Exact toy: one ring edge, k=4 sub-flows whose measured fair-share rates are
-100/50/25/100 Gbps (Sum=275). Proportional shares = 4/11, 2/11, 1/11, 4/11 of B;
-equal finish times 1/2/4/1 (100-Gbps flow = 1.0); proportional finish 400/275 =
-1.45t -> x2.75. "rate_i" here is the max-min fair share each flow gets (the
-rate[j] of Algorithm 1), not a link line rate.
+Rates 32/24/16/8 Gbps: four DISTINCT rates (two equal rates once drew as one line and
+made k=4 look like k=3), summing to 80 <= the 100 Gbps access link that all four
+sub-flows of one ring edge share (the earlier 100/50/25/100 summed to 275 Gbps, which
+the paper's own model forbids). Ratios give round shares 40/30/20/10% and:
 
-Outputs (vector PDF preferred for LaTeX, PNG fallback) next to this script:
-  fig_split_mechanism.pdf / .png
+    t       = the 32 Gbps flow's equal-split time
+    equal   : times 1t / 1.33t / 2t / 4t  -> the edge waits 4.0t for the 8G path
+    prop    : every time = share/rate     -> all four finish at 1.6t
+    speed-up 4.0/1.6 = 2.5 = sum(f)/(k*min f), exactly Proposition 1's penalty (80/32).
 
+Outputs: fig_split_mechanism.pdf / .png next to this script.
 Run:  python build_split_mechanism_fig.py
 """
 from __future__ import annotations
@@ -29,55 +46,74 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
 HERE = Path(__file__).parent
-BLUE, GREEN, RED, INK, GREY = "#1f4e78", "#2a7a2a", "#c0392b", "#24292e", "#9aa0a6"
+BLUE, GREEN, RED, INK = "#1f4e78", "#2a7a2a", "#c0392b", "#24292e"
 
 matplotlib.rcParams.update({
-    "font.size": 7.2, "axes.titlesize": 7.8, "pdf.fonttype": 42, "ps.fonttype": 42,
+    "font.size": 7.0, "axes.titlesize": 7.0, "pdf.fonttype": 42, "ps.fonttype": 42,
 })
 
 
 def main():
-    bw = [100, 50, 25, 100]
+    bw = [32, 24, 16, 8]
     k = len(bw)
-    eq_share = [1.0 / k] * k
-    prop_share = [b / sum(bw) for b in bw]                 # 4/11, 2/11, 1/11, 4/11
-    eq_lbl = ["B/4"] * k
-    prop_lbl = ["4/11 B", "2/11 B", "1/11 B", "4/11 B"]
-    t_equal = [100.0 / b for b in bw]                      # 1, 2, 4, 1
-    T_prop = (k * 100.0) / sum(bw)                         # 1.4545
-    speed = max(t_equal) / T_prop                          # 2.75
-    lane_y = list(range(k - 1, -1, -1))
+    t_eq = [max(bw) / b for b in bw]              # 1, 1.33, 2, 4  (units of t)
+    t_prop = k * max(bw) / sum(bw)                # 1.6
+    speed = max(t_eq) / t_prop                    # 2.5
+    eq_pct = [25] * k
+    prop_pct = [round(100 * b / sum(bw)) for b in bw]   # 40, 30, 20, 10
+    assert sum(prop_pct) == 100 and abs(speed - sum(bw) / (k * min(bw))) < 1e-9
 
-    fig, (axE, axP) = plt.subplots(2, 1, figsize=(3.45, 3.05))
+    fig, ax = plt.subplots(figsize=(3.45, 2.30))
+    h, gap = 0.32, 0.05
+    for i, b in enumerate(bw):
+        y = k - 1 - i
+        eq_col = RED if b == min(bw) else BLUE    # the straggler sets the equal finish
+        ax.add_patch(Rectangle((0, y + gap), t_eq[i], h, facecolor=eq_col,
+                               edgecolor="white", lw=0.5, zorder=3))
+        ax.add_patch(Rectangle((0, y - gap - h), t_prop, h, facecolor=GREEN,
+                               edgecolor="white", lw=0.5, zorder=3))
+        ax.text(t_eq[i] + 0.07, y + gap + h / 2, f"{eq_pct[i]}%", va="center",
+                ha="left", fontsize=6.0, color=eq_col)
+        ax.text(t_prop + 0.07, y - gap - h / 2, f"{prop_pct[i]}%", va="center",
+                ha="left", fontsize=6.0, color=GREEN)
 
-    def panel(ax, share, lbl, base_col, straggler_idx, title, note):
-        ax.set_xlim(0, 0.52); ax.set_ylim(-0.7, k - 0.35)
-        ax.set_yticks(lane_y); ax.set_yticklabels([f"{b} Gbps" for b in bw], fontsize=6.6)
-        ax.tick_params(left=False); ax.set_xticks([])
-        for sp in ("top", "right", "bottom", "left"):
-            ax.spines[sp].set_visible(False)
-        for i, (y, s, f) in enumerate(zip(lane_y, share, lbl)):
-            col = RED if i == straggler_idx else base_col
-            ax.add_patch(Rectangle((0, y - 0.30), s, 0.60, facecolor=col,
-                                   edgecolor="white", lw=0.5, alpha=0.93, zorder=3))
-            ax.text(s + 0.012, y, f, ha="left", va="center", fontsize=6.6,
-                    color=col, fontweight="bold")
-        ax.set_title(title, color=INK, fontweight="bold", pad=3, loc="left")
-        ax.text(0.52, -0.62, note, ha="right", va="center", fontsize=6.4,
-                color=(RED if straggler_idx >= 0 else GREEN), fontweight="bold")
+    # policies named on the first row's own bars - direct labelling, no legend to decode
+    ax.text(0.05, k - 1 + gap + h / 2, "equal split", va="center", ha="left",
+            fontsize=5.8, color="white", zorder=4)
+    ax.text(0.05, k - 1 - gap - h / 2, "proportional", va="center", ha="left",
+            fontsize=5.8, color="white", zorder=4)
 
-    panel(axE, eq_share, eq_lbl, BLUE, 2,
-          r"Equal split:  $B_i = B/k$",
-          "25-Gbps flow straggles → edge waits 4.0t")
-    panel(axP, prop_share, prop_lbl, GREEN, -1,
-          r"Proportional split:  $B_i = B\,r_i / \sum_j r_j$",
-          f"all flows finish at {T_prop:.2f}t  (×{speed:.2f})")
+    ax.axvline(max(t_eq), ls="--", lw=1.0, color=RED, zorder=5)
+    ax.axvline(t_prop, ls="--", lw=1.0, color=GREEN, zorder=5)
+    ax.text(t_prop - 0.08, k - 0.08, "all four done, 1.6t", ha="right", va="bottom",
+            fontsize=6.2, color=GREEN)
+    ax.text(max(t_eq) - 0.08, k - 0.08, "last one done, 4.0t", ha="right", va="bottom",
+            fontsize=6.2, color=RED)
+    ax.annotate("", xy=(max(t_eq), -0.58), xytext=(t_prop, -0.58),
+                arrowprops=dict(arrowstyle="<->", color=INK, lw=0.9))
+    ax.text(2.95, -0.52, f"the edge is freed ×{speed:.1f} sooner",
+            ha="center", va="bottom", fontsize=6.6, color=INK)
 
-    fig.tight_layout(pad=0.4, h_pad=1.3)
+    ax.set_yticks(range(k - 1, -1, -1))
+    ax.set_yticklabels([f"{b} Gbps" for b in bw], fontsize=6.6)
+    ax.set_ylabel("four sub-flows of one ring edge,\nby what each path carries",
+                  fontsize=6.0, linespacing=1.25)
+    ax.set_xlim(0, 4.95)
+    ax.set_ylim(-0.72, k + 0.28)
+    ax.set_xticks([0, 1, 2, 3, 4])
+    ax.set_xticklabels(["0", "1t", "2t", "3t", "4t"], fontsize=6.6)
+    ax.set_xlabel("time to send its share   (t = the 32 Gbps flow's equal-split time)",
+                  fontsize=5.9)
+    ax.tick_params(left=False)
+    for sp in ("top", "right", "left"):
+        ax.spines[sp].set_visible(False)
+    fig.tight_layout(pad=0.4)
     fig.savefig(HERE / "fig_split_mechanism.pdf")
     fig.savefig(HERE / "fig_split_mechanism.png", dpi=300)
     plt.close(fig)
-    print("wrote:", HERE / "fig_split_mechanism.pdf", "and .png")
+    print("wrote:", HERE / "fig_split_mechanism.pdf", "and .png",
+          f"| equal={[round(t, 2) for t in t_eq]}t prop={t_prop}t speed=x{speed:.1f}",
+          f"| shares {prop_pct}% vs rates {bw}")
 
 
 if __name__ == "__main__":

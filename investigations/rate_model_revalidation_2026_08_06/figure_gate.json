@@ -1,0 +1,174 @@
+{
+  "checks": {
+    "artist_manifests": {
+      "geometry_data": {
+        "figures": {
+          "fig_gap_closure": {
+            "after_sha256": "039559e58abf630ae6d9d36e1caf5842a6c55ff97c34cf014f195adbbacf3694",
+            "before_sha256": "039559e58abf630ae6d9d36e1caf5842a6c55ff97c34cf014f195adbbacf3694",
+            "first_difference": null,
+            "pass": true
+          },
+          "fig_saturation": {
+            "after_sha256": "6c7b61119e26f3d1e3671ee1abb7a9ea660b4f9963b26953f5c90a669c3b166a",
+            "before_sha256": "6c7b61119e26f3d1e3671ee1abb7a9ea660b4f9963b26953f5c90a669c3b166a",
+            "first_difference": null,
+            "pass": true
+          }
+        },
+        "pass": true
+      },
+      "pass": true,
+      "rendered_labels": {
+        "approved_change_count": 3,
+        "errors": [],
+        "observed_change_count": 3,
+        "observed_changes": [
+          {
+            "after": "(reference $-$ realised) / realised (%)",
+            "axes": 0,
+            "before": "(bound $-$ realised) / realised (%)",
+            "figure": "fig_gap_closure",
+            "text": 11
+          },
+          {
+            "after": "static local-model reference (dashed, fabric colour)",
+            "axes": 0,
+            "before": "optimal-split bound (dashed, fabric colour)",
+            "figure": "fig_saturation",
+            "text": 44
+          },
+          {
+            "after": "realised coincide (3.58$\\times$/3.62$\\times$);\nrefs diverge (3.9$\\times$ vs 6.0$\\times$)",
+            "axes": 1,
+            "before": "realised coincide (3.58$\\times$/3.62$\\times$);\nbounds diverge (3.9$\\times$ vs 6.0$\\times$)",
+            "figure": "fig_saturation",
+            "text": 0
+          }
+        ],
+        "pass": true
+      },
+      "rendered_text_bboxes": {
+        "approved_changed_boxes": [
+          {
+            "after": [
+              3.33333333333333,
+              28.5130886501736,
+              11.00000000000001,
+              160.0
+            ],
+            "axes": 0,
+            "before": [
+              3.33333333333333,
+              35.5130886501736,
+              11.00000000000001,
+              146.0
+            ],
+            "figure": "fig_gap_closure",
+            "text": 11
+          },
+          {
+            "after": [
+              72.75,
+              176.50873480902766,
+              200.0,
+              9.09825303819446
+            ],
+            "axes": 0,
+            "before": [
+              72.75,
+              176.50873480902766,
+              172.0,
+              9.09825303819446
+            ],
+            "figure": "fig_saturation",
+            "text": 44
+          }
+        ],
+        "errors": [],
+        "pass": true
+      }
+    },
+    "pdf_artifacts": {
+      "figures": {
+        "fig_gap_closure": {
+          "baseline": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\paper-overleaf\\fig_gap_closure.pdf",
+          "baseline_sha256": "69e98922928ef04b4da866b5fd4fe3a20ba58bd64a805fe6878f61efdffe2f3e",
+          "drawing_count_by_page": [
+            55
+          ],
+          "drawings_equal": true,
+          "first_box_difference": null,
+          "first_drawing_difference": null,
+          "first_font_difference": null,
+          "page_boxes_equal": true,
+          "page_count_equal": true,
+          "pass": true,
+          "rebuilt": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\ring-simulator\\paper\\fig_gap_closure.pdf",
+          "rebuilt_sha256": "69e98922928ef04b4da866b5fd4fe3a20ba58bd64a805fe6878f61efdffe2f3e",
+          "semantic_fonts_equal": true
+        },
+        "fig_saturation": {
+          "baseline": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\paper-overleaf\\fig_saturation.pdf",
+          "baseline_sha256": "fc00a141b70d1201f7c545edc5bc7e53ee5e84b9aa01b2ea3acda0dd41f2ebf6",
+          "drawing_count_by_page": [
+            297
+          ],
+          "drawings_equal": true,
+          "first_box_difference": null,
+          "first_drawing_difference": null,
+          "first_font_difference": null,
+          "page_boxes_equal": true,
+          "page_count_equal": true,
+          "pass": true,
+          "rebuilt": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\ring-simulator\\paper\\fig_saturation.pdf",
+          "rebuilt_sha256": "fc00a141b70d1201f7c545edc5bc7e53ee5e84b9aa01b2ea3acda0dd41f2ebf6",
+          "semantic_fonts_equal": true
+        }
+      },
+      "pass": true
+    },
+    "png_artifacts": {
+      "figures": {
+        "fig_gap_closure": {
+          "baseline": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\ring-simulator\\investigations\\rate_model_revalidation_2026_08_06\\figure_baseline\\fig_gap_closure.png",
+          "baseline_properties": {
+            "height": 630,
+            "mode": "RGBA",
+            "width": 1035
+          },
+          "baseline_sha256": "50d198d0b31fe3f78636e7583773102912a3eea83c0543f7a365c2254329a971",
+          "pass": true,
+          "rebuilt": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\ring-simulator\\paper\\fig_gap_closure.png",
+          "rebuilt_properties": {
+            "height": 630,
+            "mode": "RGBA",
+            "width": 1035
+          },
+          "rebuilt_sha256": "414b781268c04f43d021346e4d6bc6a674d627a126542a19ed54cae42d469027"
+        },
+        "fig_saturation": {
+          "baseline": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\ring-simulator\\investigations\\rate_model_revalidation_2026_08_06\\figure_baseline\\fig_saturation.png",
+          "baseline_properties": {
+            "height": 765,
+            "mode": "RGBA",
+            "width": 2148
+          },
+          "baseline_sha256": "dc70a20838d57228403cf49a82f86263ad019464d2ae9caf2409699cb7b70dca",
+          "pass": true,
+          "rebuilt": "C:\\BACKUP\\02_PROJECTS\\05_Communication_Networks\\networking research\\simulator\\ring-simulator\\paper\\fig_saturation.png",
+          "rebuilt_properties": {
+            "height": 765,
+            "mode": "RGBA",
+            "width": 2148
+          },
+          "rebuilt_sha256": "49fc9ba9fa8d409ae55f0352b01c7fda4e89ba57a8b20d7e3ad68c4b778841a7"
+        }
+      },
+      "pass": true
+    }
+  },
+  "errors": [],
+  "gate": "unit_2a_figure_label_only",
+  "pass": true
+}
