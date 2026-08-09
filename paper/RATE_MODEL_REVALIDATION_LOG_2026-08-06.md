@@ -907,3 +907,79 @@ override. A fresh target may start only after the patch, tests, independent
 review, commit, push, clean-checkout verification, and a new preflight. Until
 that target is sealed and independently audited, there is no full-extension
 scientific result.
+
+### Full 32-arm extension result - 2026-08-08
+
+The numerical-gate patch passed `135/135` combined tests, three independent
+code reviews, and a clean-worktree reconstruction. It was published as
+ring-simulator commit `defdf410324c27be106652d7dc751b77a3659e38` with the
+branch at `0/0` against `origin/ibrahim-paper`. `sim.py` remained byte-identical
+at SHA-256 `96505cefe2e5aa761b80080d77145bfd384c688ce4a8ca5792f8f7ce17ef59bd`;
+only the proportional validation envelope and its required evidence fields
+changed. The new `_03` preflight then passed three read-only reviews before the
+full resume was authorized.
+
+The sealed production target is
+`investigations/cp_n1000/n1000_extension_2026-08-08_03`. It contains exactly
+`28,800` paired checkpoints and `57,600` allocator rows over all `32` static
+proportional arms and samples `100..999`. The two timing segments cover all
+pairs with no recovery segment; pool wall time was `1,355.1076366` seconds
+(`22.585` minutes). Completion SHA-256 values are:
+
+- `COMPLETE.json`: `a961289b85897b4cf55fd25c291bea1d70759227f4f02d82f48dad5d3e575337`;
+- `completion_manifest.json`: `60431ebeadde621b085b7cebc5c764bc51df10288ce7940f23d2bf89bda5c66e`;
+- `analysis.json`: `6c3bbebc8fe7b9020e0fd92e3e986a63db7572928a0d8216e3b90d72b85e594d`.
+
+The production auditor and a second raw-checkpoint reconstruction both passed
+without review reasons. They rehashed all `28,812` signed artifacts
+(`249,033,692` bytes), reconstructed every pair and allocator row, and matched
+the three predeclared clustered bootstraps exactly. All `57,600` rows report
+the same `128`-ULP envelope (`1.9073486328125e-6` bytes at the 64-MiB target),
+and all `172,800` aggregate/minimum/maximum remaining-byte fields are positive
+zero. The maximum observed conservation error is the expected `68` ULPs at
+`a077_proportional_2tier_p64_k2__s457` under link-local allocation; its paired
+max-min row is `40` ULPs. Both have zero remaining flows and reproduce their
+pre-run completion-time and tick regressions exactly.
+
+The primary extension-only estimate is
+`T_network_maxmin / T_link_local = 0.9725401462`, with seed-cluster bootstrap
+95% CI `[0.9720440718, 0.9730350172]`. Thus network max-min produces about
+`2.746%` lower geometric-mean completion time in this fixed proportional
+matrix. Counts are `8,922` pairs at least two ticks faster, `19,421` exact
+ties, `457` one-tick ties, and zero pairs at least two ticks slower. The
+leave-one-seed-out range is `[0.9725184027, 0.9725865382]`, with no single-seed
+dependence.
+
+The predeclared sensitivity excluding prior-sentinel seed clusters
+`{174,199,353,657}` is nearly identical: ratio `0.9725707951`, CI
+`[0.9720697595, 0.9730538109]`. The combined secondary analysis over sealed
+samples `0..99` plus extension samples `100..999` gives `0.9725064554`, CI
+`[0.9720352047, 0.9729691712]`. Direction and interval classification agree in
+all three analyses.
+
+The effect is heterogeneous rather than a uniform shift. A descriptive
+recomputation from the signed pair table gives ratios `0.95570` for `P=64`
+and `0.98967` for `P=16`; by fabric, `2tier=0.95907`, `3tier_os4=0.96453`,
+`3tier_os2=0.97820`, and `3tier_nb=0.98864`. The strongest arm is
+`2tier/P=64/k=8` at `0.88310` (about `11.69%` lower time). Of the `32` arm
+intervals, `26` have an upper endpoint below one, three touch one, and three
+are exact ties. This supports the mechanism interpretation that link-local
+equal sharing masks performance primarily where route/link heterogeneity is
+material.
+
+The accepted status is `READY_FOR_EXPLICIT_RESEARCH_DECISION`, not automatic
+paper integration. This is fixed-matrix validation, not a blind confirmatory
+holdout. It establishes allocator sensitivity for static proportional traffic;
+it does not by itself establish an `n=1000` proportional-over-equal
+amplification, controller behavior, congestion/background behavior, TCP
+behavior, or workload-general validity. Frozen paper evidence remains
+unchanged. The 12 compact `_03` root artifacts were added to the Git evidence
+index in ring-simulator commit
+`66802687c464ce9c1ee1aee89a5995a91496aeb0`; the ignored raw checkpoints and
+timing segments remain sealed locally and have not yet been placed in an
+off-machine immutable archive.
+
+Separately, the active Overleaf snapshot was updated in commit
+`6042a588a5f2e224b149498a744c3eed5c2b5840` to remove reliance on Ethereal
+pending a dedicated literature review. That source cleanup does not integrate
+the `n=1000` allocator result into the paper.
